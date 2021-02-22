@@ -1,0 +1,84 @@
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\appsettings.Development.json
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\appsettings.json
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\first_api.exe
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\first_api.deps.json
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\first_api.runtimeconfig.json
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\first_api.runtimeconfig.dev.json
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\first_api.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\ref\first_api.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\first_api.pdb
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\Microsoft.OpenApi.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.csprojAssemblyReference.cache
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.AssemblyInfoInputs.cache
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.AssemblyInfo.cs
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.csproj.CoreCompileInputs.cache
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\staticwebassets\first_api.StaticWebAssets.Manifest.cache
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\staticwebassets\first_api.StaticWebAssets.xml
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\scopedcss\bundle\first_api.styles.css
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.RazorTargetAssemblyInfo.cache
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.csproj.CopyComplete
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\ref\first_api.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.pdb
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\obj\Debug\net5.0\first_api.genruntimeconfig.cache
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\DnsClient.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\MongoDB.Bson.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\MongoDB.Driver.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\MongoDB.Driver.Core.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\MongoDB.Libmongocrypt.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\SharpCompress.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\System.Diagnostics.DiagnosticSource.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\runtimes\win\native\libzstd.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\runtimes\win\native\snappy32.dll
+C:\Users\matheus.louly\Desktop\API ASP.NET\first_api\bin\Debug\net5.0\runtimes\win\native\snappy64.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\appsettings.Development.json
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\appsettings.json
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\first_api.exe
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\first_api.deps.json
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\first_api.runtimeconfig.json
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\first_api.runtimeconfig.dev.json
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\first_api.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\ref\first_api.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\first_api.pdb
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\DnsClient.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Abstractions.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\Microsoft.OpenApi.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\MongoDB.Bson.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\MongoDB.Driver.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\MongoDB.Driver.Core.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\MongoDB.Libmongocrypt.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\SharpCompress.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\System.Diagnostics.DiagnosticSource.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\runtimes\win\native\libzstd.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\runtimes\win\native\snappy32.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\bin\Debug\net5.0\runtimes\win\native\snappy64.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.csprojAssemblyReference.cache
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.AssemblyInfoInputs.cache
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.AssemblyInfo.cs
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.csproj.CoreCompileInputs.cache
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\staticwebassets\first_api.StaticWebAssets.Manifest.cache
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\staticwebassets\first_api.StaticWebAssets.xml
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\scopedcss\bundle\first_api.styles.css
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.RazorTargetAssemblyInfo.cache
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.csproj.CopyComplete
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\ref\first_api.dll
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.pdb
+C:\Users\matheus.louly\Documents\API_ASP.NET\first_api\obj\Debug\net5.0\first_api.genruntimeconfig.cache
