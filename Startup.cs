@@ -1,20 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using first_api.Models;
-using first_api.Services;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System;
 using Microsoft.Extensions.Options;
 using System.Threading;
+using first_api.Services;
+using first_api.Models;
 
 namespace first_api
 {
@@ -25,6 +21,8 @@ namespace first_api
             Configuration = configuration;
             Thread t = new Thread(initDb);
             t.Start();
+            Thread.Sleep(300);
+            Console.Write("\nDate Up Server :" + DateTime.UtcNow+ "\n"+"\n");
         }
         
         public void initDb() {
@@ -36,19 +34,42 @@ namespace first_api
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.Configure<AlunoDatabaseSetting>(
-                Configuration.GetSection(nameof(AlunoDatabaseSetting))
+            //Configurando o acesso ao MongoDb
+            services.Configure<CondominioDatabaseSetting>(
+                Configuration.GetSection(nameof(CondominioDatabaseSetting))
             );
 
-            services.AddSingleton<IAlunoDatabaseSetting>(sp =>
-                sp.GetRequiredService<IOptions<AlunoDatabaseSetting>>().Value);
+            //Certificando de que ira existir uma unica instancia
+            services.AddSingleton<ICondominioDatabaseSetting>(sp =>
+                sp.GetRequiredService<IOptions<CondominioDatabaseSetting>>().Value);
 
-            services.AddSingleton<AlunoService>();
+            services.AddSingleton<CondominioService>();
+
 
             services.AddControllers();
 
+            //Adiciona o servico de autenticacao atraves do JsonWebToken
+            var key = Encoding.ASCII.GetBytes(Settings.Secret);
+            services.AddAuthentication(x => 
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(x =>
+            {
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false
+                };
+            });
+
         }
 
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -60,6 +81,7 @@ namespace first_api
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
