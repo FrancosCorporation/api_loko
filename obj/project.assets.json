@@ -8212,19 +8212,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Rodolfo\\.nuget\\packages\\": {}
+    "C:\\Users\\Pichau\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Rodolfo\\git\\first_api\\first_api.csproj",
+      "projectUniqueName": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\first_api\\first_api.csproj",
       "projectName": "first_api",
-      "projectPath": "C:\\Users\\Rodolfo\\git\\first_api\\first_api.csproj",
-      "packagesPath": "C:\\Users\\Rodolfo\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Rodolfo\\git\\first_api\\obj\\",
+      "projectPath": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\first_api\\first_api.csproj",
+      "packagesPath": "C:\\Users\\Pichau\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\first_api\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Rodolfo\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Pichau\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net5.0"
