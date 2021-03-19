@@ -30,9 +30,17 @@ namespace first_api
             System.Diagnostics.Process.Start("mongod.exe", command);
         }
         public IConfiguration Configuration { get; }
+
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
     
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddCors(options => {
+                options.AddDefaultPolicy(builder => {
+                    builder.AllowAnyOrigin();
+                });
+            });
 
             //Configurando o acesso ao MongoDb
             services.Configure<CondominioDatabaseSetting>(
@@ -44,6 +52,7 @@ namespace first_api
                 sp.GetRequiredService<IOptions<CondominioDatabaseSetting>>().Value);
 
             services.AddSingleton<CondominioService>();
+            services.AddSingleton<PaymentService>();
 
 
             services.AddControllers();
@@ -72,6 +81,9 @@ namespace first_api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            app.UseCors(MyAllowSpecificOrigins);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
