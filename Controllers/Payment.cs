@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using first_api.Services;
-using first_api.Models;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json;
 
 namespace first_api.Controllers
 {

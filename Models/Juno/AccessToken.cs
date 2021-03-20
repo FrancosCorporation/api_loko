@@ -1,3 +1,4 @@
+using System;
 namespace first_api.Models
 {
     public class JunoAccessToken
@@ -8,5 +9,6 @@ namespace first_api.Models
         public string scope {get; set;}
         public string user_name {get; set;}
         public string jti {get; set;}
+        public DateTimeOffset dateTimeGenerateAccessToken {get; set;}
     }
 }
