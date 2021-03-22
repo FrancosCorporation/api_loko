@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace first_api.Controllers
 {
-    [Route("payment")]
+    [Route("subscription")]
     [ApiController]
     public class PaymentController : ControllerBase
     {
@@ -17,6 +17,9 @@ namespace first_api.Controllers
 
         [HttpPost]
         public ActionResult<dynamic> payment([FromForm] [Required] string cardHash) => _paymentService.Payment(cardHash);
+
+        [HttpGet("consult")]
+        public ActionResult<dynamic> consultSubscription([FromForm] [Required] string idSubscription) => _paymentService.consultCharges(idSubscription);
 
     }
 }

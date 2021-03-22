@@ -21,19 +21,21 @@ namespace first_api.Services
 
         private string _planId = "pln_6950A5BBD2696FB2";
 
-        public bool isTokenExpiration() {
+        public bool isTokenExpiration()
+        {
             if(DateTimeOffset.UtcNow.ToUnixTimeSeconds()-_validateAccessToken.dateTimeGenerateAccessToken.ToUnixTimeSeconds() > 3600) return true;
             return false;
         }
 
-        public dynamic getAccessToken() {
-            var client = new RestClient($"{_baseUrl}/authorization-server/oauth/token");
-            var request = new RestRequest(Method.POST);
-            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
-            request.AddHeader("Authorization", "Basic a2MxajR6bEdWM1FSdkFYbTpTZ2oyVzdGMXF3MWxhNWRHOytQVkVwak1lJHRqKSxkaA==");
-            request.AddParameter("grant_type", "client_credentials");
-
+        public dynamic getAccessToken()
+        {
             if(isTokenExpiration()) {
+                var client = new RestClient($"{_baseUrl}/authorization-server/oauth/token");
+                var request = new RestRequest(Method.POST);
+                request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+                request.AddHeader("Authorization", "Basic a2MxajR6bEdWM1FSdkFYbTpTZ2oyVzdGMXF3MWxhNWRHOytQVkVwak1lJHRqKSxkaA==");
+                request.AddParameter("grant_type", "client_credentials");
+                
                 IRestResponse response = client.Execute(request);
                 if(response.StatusCode == HttpStatusCode.OK) {
                     JunoAccessToken _junoAccessToken = JsonConvert.DeserializeObject<JunoAccessToken>(response.Content);
@@ -41,8 +43,8 @@ namespace first_api.Services
                     _validateAccessToken = _junoAccessToken;
                     return _junoAccessToken;
                 }
-                JunoError _modelJuno = JsonConvert.DeserializeObject<JunoError>(response.Content);
-                return _modelJuno;
+                JunoError _junoError = JsonConvert.DeserializeObject<JunoError>(response.Content);
+                return _junoError;
             }
             return _validateAccessToken;
         }
@@ -65,11 +67,12 @@ namespace first_api.Services
                 JunoTokenizacao _junoTokenizacao = JsonConvert.DeserializeObject<JunoTokenizacao>(response.Content);
                 return _junoTokenizacao;
             }
-            JunoError _modelJuno = JsonConvert.DeserializeObject<JunoError>(response.Content);
-            return _modelJuno;
+            JunoError _junoError = JsonConvert.DeserializeObject<JunoError>(response.Content);
+            return _junoError;
         }
 
-        public dynamic subscription(JunoAccessToken junoAccessToken ,JunoTokenizacao junoTokenizacao) {
+        public dynamic subscription(JunoAccessToken junoAccessToken ,JunoTokenizacao junoTokenizacao)
+        {
             var client = new RestClient($"{_baseUrl}/api-integration/subscriptions");
             var request = new RestRequest(Method.POST);
             request.AddHeaders(new Dictionary<string, string>() {
@@ -105,9 +108,62 @@ namespace first_api.Services
                 JunoSubscription _junoSubscription = JsonConvert.DeserializeObject<JunoSubscription>(response.Content);
                 return _junoSubscription;
             }
-            JunoError _modelJuno = JsonConvert.DeserializeObject<JunoError>(response.Content);
-            return _modelJuno;
+            JunoError _junoError = JsonConvert.DeserializeObject<JunoError>(response.Content);
+            return _junoError;
 
+        }
+
+        public ActionResult modelResponse(dynamic modelJuno)
+        {
+            switch(modelJuno.status) {
+                case 400:
+                    return BadRequest(modelJuno);
+                case 401:
+                    return Unauthorized(modelJuno);
+                case 403:
+                    return Forbid(modelJuno.details[0].message);
+                case 500:
+                    return Problem(modelJuno.details[0].message);
+                default:
+                    return Ok(modelJuno);
+            }
+        }
+
+        public dynamic consultCharges(string idSubscription)
+        {
+            dynamic _getAccessToken = getAccessToken();
+            if(_getAccessToken is JunoError) return _getAccessToken;
+
+            var client = new RestClient($"{_baseUrl}/api-integration/charges");
+            var request = new RestRequest(Method.GET);
+            request.AddHeaders(new Dictionary<string, string>() {
+                {"Authorization", $"Bearer {_getAccessToken.access_token}"},
+                {"X-Api-Version", "2"},
+                {"X-Resource-Token", "85D4CF242645507CEE7332F4451BCBF398027EEA65B36135EA64B99036DD90D4"},
+                {"Content-Type", "application/json;charset=UTF-8"}
+            });
+
+            IRestResponse response = client.Execute(request);
+
+            if(response.StatusCode == HttpStatusCode.OK)
+            {
+                JunoEmbedded _junoEmbedded = JsonConvert.DeserializeObject<JunoEmbedded>(response.Content);
+                JunoCharges _junoCharges = _junoEmbedded._embedded;
+
+                foreach (var charge in _junoCharges.charges)
+                {
+                    if(idSubscription == charge.subscription.id)
+                    {
+                        return Ok(charge.status);
+                    }
+                }
+
+                return Ok(_junoCharges.charges);
+            }
+            
+            JunoError _junoError = JsonConvert.DeserializeObject<JunoError>(response.Content);
+
+            return modelResponse(_junoError);
         }
 
         public ActionResult Payment(string cardHash)
@@ -126,20 +182,8 @@ namespace first_api.Services
                     _modelJuno = _subscription;
                 }
             }
-            
-            if(_modelJuno is JunoError) {
-                switch(_modelJuno.status) {
-                    case 400:
-                        return BadRequest(_modelJuno);
-                    case 401:
-                        return Unauthorized(_modelJuno);
-                    case 403:
-                        return Forbid(_modelJuno.details.message);
-                    case 500:
-                        return Problem(_modelJuno.details.message);
-                }
-            };
-            return Ok(_modelJuno);
+
+            return modelResponse(_modelJuno);
         }
     }
 }

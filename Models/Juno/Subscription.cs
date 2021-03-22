@@ -10,7 +10,7 @@ namespace first_api.Models
         public string status {get; set;}
         public string startsOn {get; set;}
         public string nextBillingDate {get; set;}
-        public Dictionary<dynamic, dynamic> _links {get; set;}
+
     }
 
 }
