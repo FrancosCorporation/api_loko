@@ -9,10 +9,10 @@ using System.Text;
 using System;
 using Microsoft.Extensions.Options;
 using System.Threading;
-using condominioApp.Services;
-using condominioApp.Models;
+using condominioApi.Services;
+using condominioApi.Models;
 
-namespace condominioApp
+namespace condominioApi
 {
     public class Startup
     {

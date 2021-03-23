@@ -1,7 +1,7 @@
-C:\Users\Rodolfo\git\condominioApp\obj\Debug\net5.0\apiOAuth.csprojAssemblyReference.cache
-C:\Users\Rodolfo\git\condominioApp\obj\Debug\net5.0\apiOAuth.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Rodolfo\git\condominioApp\obj\Debug\net5.0\apiOAuth.AssemblyInfoInputs.cache
-C:\Users\Rodolfo\git\condominioApp\obj\Debug\net5.0\apiOAuth.AssemblyInfo.cs
-C:\Users\Rodolfo\git\condominioApp\obj\Debug\net5.0\apiOAuth.csproj.CoreCompileInputs.cache
-C:\Users\Rodolfo\git\condominioApp\obj\Debug\net5.0\apiOAuth.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\Rodolfo\git\condominioApp\obj\Debug\net5.0\apiOAuth.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Rodolfo\git\condominioApi\obj\Debug\net5.0\apiOAuth.csprojAssemblyReference.cache
+C:\Users\Rodolfo\git\condominioApi\obj\Debug\net5.0\apiOAuth.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Rodolfo\git\condominioApi\obj\Debug\net5.0\apiOAuth.AssemblyInfoInputs.cache
+C:\Users\Rodolfo\git\condominioApi\obj\Debug\net5.0\apiOAuth.AssemblyInfo.cs
+C:\Users\Rodolfo\git\condominioApi\obj\Debug\net5.0\apiOAuth.csproj.CoreCompileInputs.cache
+C:\Users\Rodolfo\git\condominioApi\obj\Debug\net5.0\apiOAuth.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Rodolfo\git\condominioApi\obj\Debug\net5.0\apiOAuth.MvcApplicationPartsAssemblyInfo.cache

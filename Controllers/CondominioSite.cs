@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using condominioApp.Models;
-using condominioApp.Services;
+using condominioApi.Models;
+using condominioApi.Services;
 using Microsoft.AspNetCore.Authorization;
 
-namespace condominioApp.Controllers
+namespace condominioApi.Controllers
 {
     [Route("api")]
     [ApiController]

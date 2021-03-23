@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using condominioApp.Services;
+using condominioApi.Services;
 using System.ComponentModel.DataAnnotations;
 
-namespace condominioApp.Controllers
+namespace condominioApi.Controllers
 {
     [Route("subscription")]
     [ApiController]

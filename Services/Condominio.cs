@@ -1,4 +1,4 @@
-using condominioApp.Models;
+using condominioApi.Models;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using MongoDB.Bson;
@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 
-namespace condominioApp.Services
+namespace condominioApi.Services
 {
 
     public class CondominioService : ControllerBase

@@ -1,5 +1,5 @@
 using System;
-namespace condominioApp.Models
+namespace condominioApi.Models
 {
     public class JunoAccessToken
     {

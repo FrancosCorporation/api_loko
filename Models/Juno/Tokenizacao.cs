@@ -1,4 +1,4 @@
-namespace condominioApp.Models
+namespace condominioApi.Models
 {
     public class JunoTokenizacao
     {

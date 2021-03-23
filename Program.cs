@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace condominioApp
+namespace condominioApi
 {
     public class Program
     {

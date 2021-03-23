@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace condominioApp.Models
+namespace condominioApi.Models
 {
     public class JunoError
     {
