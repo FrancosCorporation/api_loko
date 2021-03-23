@@ -17,7 +17,7 @@ namespace first_api.Controllers
 
         // UsuarioAdm vai se cadastrar e cadastrar o banco
         [HttpPost("cadastroCondominio")]
-        public ActionResult<string> RegisterCondominio([FromForm] UserAdm user) =>
+        public ActionResult<dynamic> RegisterCondominio([FromForm] UserAdm user) =>
            _condominioService.RegisterCondominio(user, Request);
 
         // o user adm vai logar por aqui
@@ -26,7 +26,7 @@ namespace first_api.Controllers
 
         [HttpPost("cadastroPorteiro")]
         [Authorize(Roles = "Administrator")]
-        public ActionResult<string> RegisterPorteiro([FromForm] UserPorteiro user) =>
+        public ActionResult<dynamic> RegisterPorteiro([FromForm] UserPorteiro user) =>
            _condominioService.RegisterPorteiro(user, Request);
 
         //adm vai cadastrar por essa rota
@@ -34,23 +34,18 @@ namespace first_api.Controllers
         [Authorize(Roles = "Administrator")]
         public ActionResult<dynamic> RegisterMorador([FromForm] UserMorador user) => _condominioService.RegisterMorador(user, Request);
 
+        [HttpPost("cadastroAvisos")]
+        [Authorize(Roles = "Administrator")]
+        public ActionResult<dynamic> CadastroAvisos([FromForm] Aviso texto) => _condominioService.CadastroAvisos(texto, Request);
 
-        //[HttpGet("listacondominios")]
-        //public ActionResult<dynamic> ListCollections() => _condominioService.GetListNameCollections();
-
-
-        //[HttpGet("usercollection")]
-        //public ActionResult<dynamic> UserCollection(string nameCondominio) => _condominioService.GetCondominios(nameCondominio);
-
-
-
-        // o user do app vai logar por aqui
-        //[HttpPost("loginapp")]
-        //public ActionResult<dynamic> LoginUser([FromForm]string username, [FromForm]string password, [FromForm]string nameCondominio) => 
-        // _condominioService.RegisterAdmw2(username: username, password: password, nameCondominio: nameCondominio);
-
-        //aonde vai puxar para listar os condominios e os moradores vao poder escolher qual o condominio
+        [HttpPost("criarAgendamento")]
+        [Authorize(Roles = "Administrator")]
+        public ActionResult<dynamic> CriarAgendamento([FromForm] Agendamento agend) => _condominioService.CriarAgendamento(agend, Request);
         
+        [HttpPost("enviarfoto")]
+        public ActionResult<dynamic> EnviarFoto() => _condominioService.EnviarFoto(Request);
+
+
 
     }
 }

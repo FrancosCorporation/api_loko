@@ -13,6 +13,8 @@ namespace first_api.Models
         public string cidade { get; set; }
         [Required]
         public string endereco { get; set; }
+        [Required]
+        private new string nameCondominio { get{return this.nameCondominio; } set{this.nameCondominio = nameCondominio;} }
 
 
     }
@@ -55,11 +57,13 @@ namespace first_api.Models
         public string password { get; set; }
         public string role { get; set; }
         public string nameCondominio { get; set; }
+        public byte[] image { get; set; }
         public BsonInt64 datacreate { get; set; }
     }
     public class UserGenericLogin : UserGeneric
     {
         [Required]
-        new public string nameCondominio { get; set; }
+        private new string nameCondominio { get{return this.nameCondominio; } set{this.nameCondominio = nameCondominio;} }
+
     }
 }

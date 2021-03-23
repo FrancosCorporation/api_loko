@@ -17,10 +17,17 @@ namespace first_api.Controllers
 
         // Usuariomorador vai se Logar
         [HttpPost("loginMorador")]
-        public ActionResult<string> LoginMorador([FromForm] UserGenericLogin user) =>
-           _condominioService.LoginMorador(user, Request);
+        public ActionResult<string> LoginMorador([FromForm] UserGenericLogin user) => _condominioService.LoginMorador(user, Request);
 
         [HttpGet("listacondominios")]
         public ActionResult<dynamic> GetListNameDatabase() => _condominioService.GetListNameDatabase();
+
+        [HttpPost("listaagendamentos")]
+        //[Authorize(Roles = "Morador")]
+        public ActionResult<dynamic> ListaAgendamentos() => _condominioService.ListaAgendamentos(Request);
+
+        [HttpPost("cadastrarAgendamento")]
+        [Authorize(Roles = "Morador")]
+        public ActionResult<dynamic> CadastrarAgendamento([FromForm] Agendamento agend, [FromForm][Required] string name) => _condominioService.CadastrarAgendamento(agend,name, Request);
     }
 }
