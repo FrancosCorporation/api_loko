@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using first_api.Models;
 using first_api.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
 
 namespace first_api.Controllers
 {
@@ -28,6 +29,6 @@ namespace first_api.Controllers
 
         [HttpPost("cadastrarAgendamento")]
         [Authorize(Roles = "Morador")]
-        public ActionResult<dynamic> CadastrarAgendamento([FromForm] CriacaoAgendamento agend, [FromForm] string name) => _condominioService.CadastrarAgendamento(agend,name, Request);
+        public ActionResult<dynamic> CadastrarAgendamento([FromForm] CriacaoAgendamento agend, [FromForm] [Required] string name) => _condominioService.CadastrarAgendamento(agend,name, Request);
     }
 }

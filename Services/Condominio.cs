@@ -47,22 +47,22 @@ namespace first_api.Services
             IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameCondominio));
             {
 
-            List<string> listNameCollection = new List<string>();
+                List<string> listNameCollection = new List<string>();
 
-            using (var cursor = _newDatabase.ListCollectionNames())
-            {
-                while (cursor.MoveNext())
+                using (var cursor = _newDatabase.ListCollectionNames())
                 {
-                    foreach (var current in cursor.Current)
+                    while (cursor.MoveNext())
                     {
-                       if (current != "avisos" && current != "configApp" && current != "usersAdm" && current != "usersPorteiros"&& current != "usersMoradores") listNameCollection.Add(current);
+                        foreach (var current in cursor.Current)
+                        {
+                            if (current != "avisos" && current != "configApp" && current != "usersAdm" && current != "usersPorteiros" && current != "usersMoradores") listNameCollection.Add(current);
+                        }
                     }
                 }
+
+                return listNameCollection;
             }
 
-            return listNameCollection;
-        }
-            
         }
         public dynamic GetInfoUser(HttpRequest request)
         {
@@ -280,8 +280,8 @@ namespace first_api.Services
                 JObject jsonClaim = userService.UnGenereteToken(request);
                 string nameCondominio = jsonClaim["nameCondominio"].ToString();
                 IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                db.GetCollection<BsonDocument>(userService.RemoverCaracterEspecialDeixarEspaco(name)).InsertOne(objectsService.RetornaCriacaoAgendamento(agend,request));
-                return Ok("Agendado  para agendamentos cadastrado com Sucesso");
+                db.GetCollection<BsonDocument>(userService.RemoverCaracterEspecialDeixarEspaco(name)).InsertOne(objectsService.RetornaCriacaoAgendamento(agend, request));
+                return Ok("Agendado em "+name+" para "+ agend.dateAgendamento +", Sucesso !");
             }
             catch (System.Exception e)
             {
