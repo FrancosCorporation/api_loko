@@ -9,10 +9,10 @@ using System.Text;
 using System;
 using Microsoft.Extensions.Options;
 using System.Threading;
-using first_api.Services;
-using first_api.Models;
+using condominioApp.Services;
+using condominioApp.Models;
 
-namespace first_api
+namespace condominioApp
 {
     public class Startup
     {
@@ -26,7 +26,7 @@ namespace first_api
         }
         
         public void initDb() {
-            string command = "--dbpath db";
+            string command = "--bind_ip 127.0.0.1 --port 27017 --dbpath db";
             System.Diagnostics.Process.Start("mongod.exe", command);
         }
         public IConfiguration Configuration { get; }

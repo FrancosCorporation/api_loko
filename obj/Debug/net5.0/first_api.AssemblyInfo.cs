@@ -11,12 +11,12 @@ using System;
 using System.Reflection;
 
 [assembly: Microsoft.AspNetCore.Identity.UI.UIFrameworkAttribute("Bootstrap4")]
-[assembly: System.Reflection.AssemblyCompanyAttribute("first_api")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("condominioApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
-[assembly: System.Reflection.AssemblyProductAttribute("first_api")]
-[assembly: System.Reflection.AssemblyTitleAttribute("first_api")]
+[assembly: System.Reflection.AssemblyProductAttribute("condominioApp")]
+[assembly: System.Reflection.AssemblyTitleAttribute("condominioApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Gerado pela classe WriteCodeFragment do MSBuild.

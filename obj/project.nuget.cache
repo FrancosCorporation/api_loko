@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "9yG5RaDSJ7GDeWv922Gpr9eDki6UDcB8baLZCE/BGzq44oATDcCYNvrBIbguhETyA+JgyVhZ9y0Ycpa9tbO4wA==",
+  "dgSpecHash": "AatVB+q6zJQyulHRbdD6kMTAVoBJqS2Q0FmStL/R409er4+h7Wy19Em4NgG7A9Bn8eltg0zcDJL4rdMZTjtyqQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\first_api\\first_api.csproj",
+  "projectFilePath": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\condominioApp\\first_api.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Pichau\\.nuget\\packages\\azure.core\\1.4.1\\azure.core.1.4.1.nupkg.sha512",
     "C:\\Users\\Pichau\\.nuget\\packages\\azure.identity\\1.2.3\\azure.identity.1.2.3.nupkg.sha512",

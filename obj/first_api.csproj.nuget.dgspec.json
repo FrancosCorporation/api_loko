@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\first_api\\first_api.csproj": {}
+    "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\condominioApp\\first_api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\first_api\\first_api.csproj": {
+    "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\condominioApp\\first_api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\first_api\\first_api.csproj",
+        "projectUniqueName": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\condominioApp\\first_api.csproj",
         "projectName": "first_api",
-        "projectPath": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\first_api\\first_api.csproj",
+        "projectPath": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\condominioApp\\first_api.csproj",
         "packagesPath": "C:\\Users\\Pichau\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\first_api\\obj\\",
+        "outputPath": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\condominioApp\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Pichau\\AppData\\Roaming\\NuGet\\NuGet.Config"

@@ -1,5 +1,5 @@
 using System;
-using first_api.Models;
+using condominioApp.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Http;
 /*
     Gera token utilizando a chave Secret no arquivo Settings
 */
-namespace first_api.Services
+namespace condominioApp.Services
 {
     public class UserService
     {

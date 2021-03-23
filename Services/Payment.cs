@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using RestSharp;
 using Newtonsoft.Json;  
 using System.Collections.Generic;
-using first_api.Models;
+using condominioApp.Models;
 using System.Net;
 using System;
 
-namespace first_api.Services
+namespace condominioApp.Services
 {
     public class PaymentService : ControllerBase
     {

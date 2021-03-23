@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace first_api.Models
+namespace condominioApp.Models
 {
     public class JunoEmbedded
     {        
