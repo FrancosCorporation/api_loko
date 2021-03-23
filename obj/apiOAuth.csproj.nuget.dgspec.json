@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Rodolfo\\git\\first_api\\apiOAuth.csproj": {}
+    "C:\\Users\\Rodolfo\\git\\condominioApi\\apiOAuth.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Rodolfo\\git\\first_api\\apiOAuth.csproj": {
+    "C:\\Users\\Rodolfo\\git\\condominioApi\\apiOAuth.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Rodolfo\\git\\first_api\\apiOAuth.csproj",
+        "projectUniqueName": "C:\\Users\\Rodolfo\\git\\condominioApi\\apiOAuth.csproj",
         "projectName": "apiOAuth",
-        "projectPath": "C:\\Users\\Rodolfo\\git\\first_api\\apiOAuth.csproj",
+        "projectPath": "C:\\Users\\Rodolfo\\git\\condominioApi\\apiOAuth.csproj",
         "packagesPath": "C:\\Users\\Rodolfo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Rodolfo\\git\\first_api\\obj\\",
+        "outputPath": "C:\\Users\\Rodolfo\\git\\condominioApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Rodolfo\\AppData\\Roaming\\NuGet\\NuGet.Config"

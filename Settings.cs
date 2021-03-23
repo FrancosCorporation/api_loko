@@ -1,4 +1,4 @@
-namespace first_api
+namespace condominioApi
 {
     public static class Settings
     {

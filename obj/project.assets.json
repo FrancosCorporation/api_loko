@@ -8217,11 +8217,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Rodolfo\\git\\first_api\\first_api.csproj",
-      "projectName": "first_api",
-      "projectPath": "C:\\Users\\Rodolfo\\git\\first_api\\first_api.csproj",
+      "projectUniqueName": "C:\\Users\\Rodolfo\\git\\condominioApi\\condominioApi.csproj",
+      "projectName": "condominioApi",
+      "projectPath": "C:\\Users\\Rodolfo\\git\\condominioApi\\condominioApi.csproj",
       "packagesPath": "C:\\Users\\Rodolfo\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Rodolfo\\git\\first_api\\obj\\",
+      "outputPath": "C:\\Users\\Rodolfo\\git\\condominioApi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Rodolfo\\AppData\\Roaming\\NuGet\\NuGet.Config"

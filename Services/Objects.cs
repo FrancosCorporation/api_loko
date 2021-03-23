@@ -1,11 +1,11 @@
 using System;
-using first_api.Models;
+using condominioApi.Models;
 using MongoDB.Bson;
 using Microsoft.AspNetCore.Http;
 /*
     Gera token utilizando a chave Secret no arquivo Settings
 */
-namespace first_api.Services
+namespace condominioApi.Services
 {
     public class ObjectsService
     {

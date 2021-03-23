@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "iBNkyDZdeV8LxpL8aMRW1fom/DACNIa/JgoI2mnZCrAF03astxSnoOp/5yL0OLmxblSK/8QA3G3n/K4AO3CGcg==",
+  "dgSpecHash": "7QLJN/2xEw1x6ZBYDZQ2OeGZjpprZRv3km8XiueOkNqY6aA9uy8Pmmvw0cjRa+3o/jCQCcZ1AyKeAEuh3/DJ4A==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Rodolfo\\git\\first_api\\first_api.csproj",
+  "projectFilePath": "C:\\Users\\Rodolfo\\git\\condominioApi\\condominioApi.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Rodolfo\\.nuget\\packages\\azure.core\\1.4.1\\azure.core.1.4.1.nupkg.sha512",
     "C:\\Users\\Rodolfo\\.nuget\\packages\\azure.identity\\1.2.3\\azure.identity.1.2.3.nupkg.sha512",

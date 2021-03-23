@@ -1,4 +1,4 @@
-namespace first_api.Models
+namespace condominioApi.Models
 {
     public class CondominioDatabaseSetting : ICondominioDatabaseSetting
     {

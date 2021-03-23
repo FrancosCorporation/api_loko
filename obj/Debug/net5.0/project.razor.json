@@ -1,5 +1,5 @@
 {
-  "FilePath": "c:\\Users\\Rodolfo\\git\\first_api\\first_api.csproj",
+  "FilePath": "c:\\Users\\Rodolfo\\git\\condominioApi\\condominioApi.csproj",
   "Configuration": {
     "ConfigurationName": "MVC-3.0",
     "LanguageVersion": "5.0",
@@ -15600,7 +15600,7 @@
     ],
     "CSharpLanguageVersion": 900
   },
-  "RootNamespace": "first_api",
+  "RootNamespace": "condominioApi",
   "Documents": [],
   "SerializationFormat": "0.2"
 }
