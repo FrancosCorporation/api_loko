@@ -28,6 +28,6 @@ namespace first_api.Controllers
 
         [HttpPost("cadastrarAgendamento")]
         [Authorize(Roles = "Morador")]
-        public ActionResult<dynamic> CadastrarAgendamento([FromForm] Agendamento agend, [FromForm][Required] string name) => _condominioService.CadastrarAgendamento(agend,name, Request);
+        public ActionResult<dynamic> CadastrarAgendamento([FromForm] CriacaoAgendamento agend, [FromForm] string name) => _condominioService.CadastrarAgendamento(agend,name, Request);
     }
 }
