@@ -1,4 +1,7 @@
 using System;
+using System.Net;
+using System.Net.Mail;
+using System.Net.Mime;
 using condominioApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -94,7 +97,7 @@ namespace condominioApi.Services
 
             try
             {
-                if (user is UserAdm  || user is  UserPorteiro)
+                if (user is UserAdm || user is UserPorteiro)
                 {
 
                     if (database.GetDatabase("userscondominio").GetCollection<UserReferencia>("users").Find(UserReferencia => UserReferencia.email == user.email).ToList().Count >= 1)
@@ -255,6 +258,32 @@ namespace condominioApi.Services
 
             return "";
         }
-       
+        public void SendEmail()
+        {
+            SmtpClient client = new SmtpClient("smtp.gmail.com", 587);
+            client.Credentials = new NetworkCredential("seunegocioonlineagr@gmail.com", "35141543Rd");
+            client.UseDefaultCredentials = false;
+            client.EnableSsl = true;
+            client.DeliveryMethod = SmtpDeliveryMethod.Network;
+
+
+            string to = "rodolfofranco14@hotmail.com";
+            string from = "noreply@noreply.com";
+            MailMessage message = new MailMessage(from, to);
+            message.Subject = "Using the new SMTP client";
+            message.IsBodyHtml = true;
+            message.Body = "Using this new feature, you can send an email message from an application very easily.";
+            try
+            {
+                client.Send(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception caught in CreateTestMessage2(): {0}",
+                    ex.ToString());
+            }
+        }
+
+
     }
 }

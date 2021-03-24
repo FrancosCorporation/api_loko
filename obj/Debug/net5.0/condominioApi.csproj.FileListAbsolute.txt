@@ -144,3 +144,6 @@ C:\Users\Rodolfo\git\condominioApi\obj\Debug\net5.0\condominioApi.dll
 C:\Users\Rodolfo\git\condominioApi\obj\Debug\net5.0\ref\condominioApi.dll
 C:\Users\Rodolfo\git\condominioApi\obj\Debug\net5.0\condominioApi.pdb
 C:\Users\Rodolfo\git\condominioApi\obj\Debug\net5.0\condominioApi.genruntimeconfig.cache
+C:\Users\Rodolfo\git\condominioApi\bin\Debug\net5.0\SendGrid.dll
+C:\Users\Rodolfo\git\condominioApi\bin\Debug\net5.0\StarkbankEcdsa.dll
+C:\Users\Rodolfo\git\condominioApi\bin\Debug\net5.0\SmtpServer.dll
