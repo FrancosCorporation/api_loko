@@ -23,7 +23,6 @@ namespace condominioApi.Services
             _clientMongoDb = client;
             _condominiosDatabase = client.GetDatabase(setting.DatabaseName);
         }
-
         public List<string> GetListNameDatabase()
         {
             List<string> listNameDatabase = new List<string>();
@@ -148,7 +147,7 @@ namespace condominioApi.Services
                 if (!userService.EmailExist(user, _clientMongoDb))
                 {
 
-                    if (verificardatabaseexist(user))
+                    if (VerificarDatabaseExist(user.nameCondominio))
                     {
                         return Conflict("Esse nome de condominio já esta cadastrado, tente outro nome");
                     }
@@ -237,7 +236,7 @@ namespace condominioApi.Services
                 return Unauthorized("Token Invalido");
             }
         }
-        public dynamic CadastroAvisos(Aviso texto, HttpRequest request)
+        public dynamic CadastroComunicado(Aviso texto, HttpRequest request)
         {
             try
             {
@@ -261,10 +260,18 @@ namespace condominioApi.Services
             {
                 JObject jsonClaim = userService.UnGenereteToken(request);
                 string nameCondominio = jsonClaim["nameCondominio"].ToString();
-                IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                db.GetCollection<BsonDocument>("configApp").InsertOne(objectsService.RetornaAgendamento(agend));
-                db.CreateCollection(userService.RemoverCaracterEspecialDeixarEspaco(agend.itemNome));
-                return Ok(agend.itemNome + " para agendamentos cadastrado com Sucesso");
+                if (!verificarAgendamentosExist(nameCondominio, agend.itemNome))
+                {
+                    IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+                    db.GetCollection<BsonDocument>("configApp").InsertOne(objectsService.RetornaAgendamento(agend));
+                    db.CreateCollection(userService.RemoverCaracterEspecialDeixarEspaco(agend.itemNome));
+                    return Ok(agend.itemNome + " para agendamentos cadastrado com Sucesso");
+                }
+                else
+                {
+                    return Conflict(agend.itemNome + " Já está cadastrado !");
+                }
+
             }
             catch (System.Exception e)
             {
@@ -281,7 +288,34 @@ namespace condominioApi.Services
                 string nameCondominio = jsonClaim["nameCondominio"].ToString();
                 IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
                 db.GetCollection<BsonDocument>(userService.RemoverCaracterEspecialDeixarEspaco(name)).InsertOne(objectsService.RetornaCriacaoAgendamento(agend, request));
-                return Ok("Agendado em "+name+" para "+ agend.dateAgendamento +", Sucesso !");
+                return Ok("Agendado em " + name + " para " + agend.dateAgendamento + ", Sucesso !");
+            }
+            catch (System.Exception e)
+            {
+                Console.Write(e);
+                return Conflict();
+            }
+
+        }
+        public dynamic EditarAgendamento(Agendamento agend, HttpRequest request)
+        {
+            try
+            {
+                string nameCondominio = userService.UnGenereteToken(request)["nameCondominio"].ToString();
+                if (verificarAgendamentosExist(nameCondominio, agend.itemNome))
+                {
+                    IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+                    BsonDocument old = GetAgendamento(nameCondominio, agend.itemNome).ToBsonDocument();
+                    BsonDocument novo = objectsService.RetornaAgendamento(agend);
+                    novo["_id"]= old["_id"];
+                    db.GetCollection<BsonDocument>("configApp").ReplaceOne(old,novo);
+                    return Ok("Agendado em " + agend.itemNome + " alterado com Sucesso !");
+                }
+                else
+                {
+                    return Conflict(agend.itemNome + " não exite.");
+                }
+
             }
             catch (System.Exception e)
             {
@@ -308,11 +342,11 @@ namespace condominioApi.Services
             }
 
         }
-        public Boolean verificardatabaseexist(UserAdm user)
+        public Boolean VerificarDatabaseExist(String nameDatabase)
         {
             try
             {
-                if (_clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio)).ListCollections().ToList().Count > 0)
+                if (_clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameDatabase)).ListCollections().ToList().Count > 0)
                 {
                     return true;
                 }
@@ -322,6 +356,42 @@ namespace condominioApi.Services
             catch
             {
                 return false;
+            }
+        }
+        public Boolean verificarAgendamentosExist(String nameDatabase, String nameitem)
+        {
+            try
+            {
+                if (GetAgendamento(nameDatabase, nameitem) != null)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public Agendamento GetAgendamento(String nameDatabase, String nameitem)
+        {
+            try
+            {
+                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameDatabase));
+                IMongoCollection<Agendamento> agend = _newDatabase.GetCollection<Agendamento>("configApp");
+                Agendamento agendam = agend.Find(agendam => agendam.itemNome == userService.RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
+
+                if (agendam != null)
+                {
+                    return agendam;
+                }
+
+                return null;
+            }
+            catch
+            {
+                return null;
             }
         }
     }

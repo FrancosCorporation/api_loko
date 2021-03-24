@@ -34,9 +34,9 @@ namespace condominioApi.Controllers
         [Authorize(Roles = "Administrator")]
         public ActionResult<dynamic> RegisterMorador([FromForm] UserMorador user) => _condominioService.RegisterMorador(user, Request);
 
-        [HttpPost("cadastroAvisos")]
+        [HttpPost("cadastroComunicado")]
         [Authorize(Roles = "Administrator")]
-        public ActionResult<dynamic> CadastroAvisos([FromForm] Aviso texto) => _condominioService.CadastroAvisos(texto, Request);
+        public ActionResult<dynamic> CadastroComunicado([FromForm] Aviso texto) => _condominioService.CadastroComunicado(texto, Request);
 
         [HttpPost("criarAgendamento")]
         [Authorize(Roles = "Administrator")]
@@ -45,6 +45,10 @@ namespace condominioApi.Controllers
         [HttpPost("enviarfoto")]
         public ActionResult<dynamic> EnviarFoto() => _condominioService.EnviarFoto(Request);
 
+        [HttpPut("editAgendamento")]
+        [Authorize(Roles = "Administrator")]
+        public ActionResult<dynamic> EditarAgendamento([FromForm] Agendamento agend) => _condominioService.EditarAgendamento(agend, Request);
+    
 
 
     }
