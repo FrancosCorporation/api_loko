@@ -66,11 +66,14 @@ namespace condominioApi.Controllers
         public ActionResult<dynamic> ConfirmacaoEmail([FromQuery] [Required] string token) => _condominioService.ConfirmacaoEmail(token,Request);
 
 
-        [HttpGet("editarSenha")]
+        [HttpGet("recuperarSenhaCondominio")]
         public ActionResult<dynamic> EditarSenha([FromQuery] [Required] string token,[FromQuery] [Required] string senha) => _condominioService.EditarSenha(token, senha,Request);
 
+        [HttpPut("alterarSenha")]
+        public ActionResult<dynamic> AlterarSenha([FromQuery] [Required] string senha) => _condominioService.AlterarSenha(senha,Request);
 
-        [HttpPost("redefinirSenha")]
+
+        [HttpPost("esqueciMinhaSenha")]
         public ActionResult<dynamic> RedefinirSenha([FromForm] [Required] RedefinirSenha red) => _condominioService.RedefinirSenha(red,Request);
 
     }

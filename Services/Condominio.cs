@@ -345,9 +345,60 @@ namespace condominioApi.Services
             IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
             if (userService.ValidateToken(request))
             {
+                if (role == "Administrator")
+                {
+                    string nameCollection = "usersAdm";
+                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    novo["password"] = _passwordSHA256;
+                    //pego a colection                         faço a alteração
+                    db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
+                    return Ok("Senha Alterada");
 
-                //UserMorador _user = _users.Find(_user => _user.email == user.email & _user.password == _passwordSHA256).ToList()[0];
-                //string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
+                }
+                else if (role == "Porteiro")
+                {
+                    string nameCollection = "usersPorteiros";
+                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    novo["password"] = _passwordSHA256;
+                    //pego a colection                         faço a alteração
+                    db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
+                    return Ok("Senha Alterada");
+                }
+                else if (role == "Morador")
+                {
+                    string nameCollection = "usersMoradores";
+                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    novo["password"] = _passwordSHA256;
+                    //pego a colection                         faço a alteração
+                    db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
+                    return Ok("Senha Alterada");
+                }
+                else
+                {
+                    return Unauthorized();
+                }
+
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
+        public dynamic AlterarSenha(string senha, HttpRequest request)
+        {
+            //password para hash
+            string _passwordSHA256 = userService.passwordToHash(senha);
+            string nameCondominio = userService.UnGenereteToken(request)["nameCondominio"].ToString();
+            string role = userService.UnGenereteToken(request)["role"].ToString();
+            string id = userService.UnGenereteToken(request)["objectId"].ToString();
+            //pego o database  
+            IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+            if (userService.ValidateToken(request))
+            {
+
                 if (role == "Administrator")
                 {
                     string nameCollection = "usersAdm";
