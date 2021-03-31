@@ -39,7 +39,7 @@ namespace condominioApi.Models
     }
     public class Agendamento : ObjectBase
     {
-        public BsonBoolean ativo { get; set; }
+        public bool ativo { get; set; }
         [Required]
         public string horaInicio { get; set; }
         [Required]
@@ -51,6 +51,23 @@ namespace condominioApi.Models
         [Required]
         public string diasSemana { get; set; }
         public string descricao { get; set; }
+
+    }
+    public class Email
+    {
+        public string titulo { get; set; }
+        public string body { get; set; }
+        public string email { get; set; }
+
+    }
+    public class RedefinirSenha
+    {
+        [Required]
+        public string email { get; set; }
+        [Required]
+        public string role { get; set; }
+        [Required]
+        public string nameCondominio { get; set; }
 
     }
 

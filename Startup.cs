@@ -18,8 +18,6 @@ namespace condominioApi
     {
         public Startup(IConfiguration configuration)
         {
-            UserService us = new UserService();
-            us.SendEmail();
             Configuration = configuration;
             Thread t = new Thread(initDb);
             t.Start();

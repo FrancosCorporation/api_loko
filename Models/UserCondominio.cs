@@ -4,7 +4,7 @@ using MongoDB.Bson;
 
 namespace condominioApi.Models
 {
-    public class UserAdm : UserGeneric
+    public class UserAdm : UserGenericLogin
     {
 
         [Required]
@@ -13,8 +13,7 @@ namespace condominioApi.Models
         public string cidade { get; set; }
         [Required]
         public string endereco { get; set; }
-        [Required]
-        private new string nameCondominio { get{return this.nameCondominio; } set{this.nameCondominio = nameCondominio;} }
+        public bool verificado {get; set;}
 
 
     }
@@ -30,7 +29,7 @@ namespace condominioApi.Models
         public string databaseName { get; set; }
         public string role { get; set; }
     }
-    public class UserMorador : UserGeneric
+    public class UserMorador : UserGenericLogin
     {
         [Required]
         public string nome { get; set; }
@@ -40,7 +39,7 @@ namespace condominioApi.Models
         public string numeroapartamento { get; set; }
 
     }
-    public class UserPorteiro : UserGeneric
+    public class UserPorteiro : UserGenericLogin
     {
         [Required]
         public string nome { get; set; }
@@ -56,14 +55,12 @@ namespace condominioApi.Models
         [Required]
         public string password { get; set; }
         public string role { get; set; }
-        public string nameCondominio { get; set; }
         public byte[] image { get; set; }
         public BsonInt64 datacreate { get; set; }
     }
     public class UserGenericLogin : UserGeneric
     {
         [Required]
-        private new string nameCondominio { get{return this.nameCondominio; } set{this.nameCondominio = nameCondominio;} }
-
+        public string nameCondominio { get; set; }
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using condominioApi.Models;
 using condominioApi.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
 
 namespace condominioApi.Controllers
 {
@@ -41,15 +42,36 @@ namespace condominioApi.Controllers
         [HttpPost("criarAgendamento")]
         [Authorize(Roles = "Administrator")]
         public ActionResult<dynamic> CriarAgendamento([FromForm] Agendamento agend) => _condominioService.CriarAgendamento(agend, Request);
-        
-        [HttpPost("enviarfoto")]
-        public ActionResult<dynamic> EnviarFoto() => _condominioService.EnviarFoto(Request);
+
+        [HttpPost("editFoto")]
+        public ActionResult<dynamic> EnviarFoto([FromForm] byte[] foto) => _condominioService.EnviarFoto(foto, Request);
 
         [HttpPut("editAgendamento")]
         [Authorize(Roles = "Administrator")]
         public ActionResult<dynamic> EditarAgendamento([FromForm] Agendamento agend) => _condominioService.EditarAgendamento(agend, Request);
-    
 
+        [HttpGet("listaAgendamentos")]
+        public ActionResult<dynamic> ListaAgendamentos() => _condominioService.ListaAgendamentos(Request);
+
+        [HttpGet("listaItensAgendamentos")]
+        public ActionResult<dynamic> ListaItensAgendamentos([FromForm] ObjectBase obj) => _condominioService.ListaItensAgendamentos(obj, Request);
+
+        [HttpGet("configAgendamentos")]
+        public ActionResult<dynamic> GetConfigAgendamentos([FromForm] ObjectBase obj) => _condominioService.GetConfigAgendamentos(obj, Request);
+
+        [HttpGet("comunicados")]
+        public ActionResult<dynamic> GetAgendamento() => _condominioService.GetAgendamento(Request);
+
+        [HttpGet("confirmacaoEmail")]
+        public ActionResult<dynamic> ConfirmacaoEmail([FromQuery] [Required] string token) => _condominioService.ConfirmacaoEmail(token,Request);
+
+
+        [HttpGet("editarSenha")]
+        public ActionResult<dynamic> EditarSenha([FromQuery] [Required] string token,[FromQuery] [Required] string senha) => _condominioService.EditarSenha(token, senha,Request);
+
+
+        [HttpPost("redefinirSenha")]
+        public ActionResult<dynamic> RedefinirSenha([FromForm] [Required] RedefinirSenha red) => _condominioService.RedefinirSenha(red,Request);
 
     }
 }

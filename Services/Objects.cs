@@ -47,11 +47,6 @@ namespace condominioApi.Services
                     {"datacreate", DateTimeOffset.Now.ToUnixTimeSeconds()}
                 };
         }
-        public String RetornaImage(){
-            string bits_imgage = "";
-
-            return bits_imgage;
-        }
        
     }
 }
