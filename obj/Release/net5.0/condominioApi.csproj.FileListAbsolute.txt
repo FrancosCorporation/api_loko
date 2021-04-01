@@ -1,0 +1,31 @@
+C:\app\build\dist\web.config
+C:\app\build\appsettings.Development.json
+C:\app\build\appsettings.json
+C:\app\build\dist\appsettings.Development.json
+C:\app\build\dist\appsettings.json
+C:\app\build\dist\condominioApi.deps.json
+C:\app\build\dist\condominioApi.runtimeconfig.json
+C:\app\build\condominioApi.StaticWebAssets.xml
+C:\app\build\condominioApi.exe
+C:\app\build\condominioApi.deps.json
+C:\app\build\condominioApi.runtimeconfig.json
+C:\app\build\condominioApi.runtimeconfig.dev.json
+C:\app\build\condominioApi.dll
+C:\app\build\ref\condominioApi.dll
+C:\app\build\condominioApi.pdb
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.csprojAssemblyReference.cache
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.AssemblyInfoInputs.cache
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.AssemblyInfo.cs
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.csproj.CoreCompileInputs.cache
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\staticwebassets\condominioApi.StaticWebAssets.Manifest.cache
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\staticwebassets\condominioApi.StaticWebAssets.xml
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\scopedcss\bundle\condominioApi.styles.css
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.RazorTargetAssemblyInfo.cache
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.csproj.CopyComplete
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.dll
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\ref\condominioApi.dll
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.pdb
+C:\Users\Pichau\Desktop\Flutter\Api Condominio\condominioApi\obj\Release\net5.0\condominioApi.genruntimeconfig.cache

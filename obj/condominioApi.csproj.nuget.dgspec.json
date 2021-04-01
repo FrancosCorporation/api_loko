@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Rodolfo\\git\\condominioApi\\condominioApi.csproj": {}
+    "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\condominioApi\\condominioApi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Rodolfo\\git\\condominioApi\\condominioApi.csproj": {
+    "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\condominioApi\\condominioApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Rodolfo\\git\\condominioApi\\condominioApi.csproj",
+        "projectUniqueName": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\condominioApi\\condominioApi.csproj",
         "projectName": "condominioApi",
-        "projectPath": "C:\\Users\\Rodolfo\\git\\condominioApi\\condominioApi.csproj",
-        "packagesPath": "C:\\Users\\Rodolfo\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Rodolfo\\git\\condominioApi\\obj\\",
+        "projectPath": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\condominioApi\\condominioApi.csproj",
+        "packagesPath": "C:\\Users\\Pichau\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Pichau\\Desktop\\Flutter\\Api Condominio\\condominioApi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Rodolfo\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Pichau\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net5.0"

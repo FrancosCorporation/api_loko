@@ -19,16 +19,9 @@ namespace condominioApi
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            Thread t = new Thread(initDb);
-            t.Start();
-            Thread.Sleep(300);
             Console.Write("\nDate Up Server :" + DateTime.UtcNow+ "\n"+"\n");
         }
         
-        public void initDb() {
-            string command = "--bind_ip 127.0.0.1 --port 27017 --dbpath db";
-            System.Diagnostics.Process.Start("mongod.exe", command);
-        }
         public IConfiguration Configuration { get; }
 
         readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";

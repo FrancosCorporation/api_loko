@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "first_api": {
+    "condominioApi": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": true,

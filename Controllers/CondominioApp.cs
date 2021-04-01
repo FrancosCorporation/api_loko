@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using condominioApi.Models;
 using condominioApi.Services;
-using Microsoft.AspNetCore.Authorization;
 
 namespace condominioApi.Controllers
 {
@@ -22,5 +21,10 @@ namespace condominioApi.Controllers
 
         [HttpGet("listacondominios")]
         public ActionResult<dynamic> GetListNameDatabase() => _condominioService.GetListNameDatabase();
+
+        [HttpGet("teste")]
+        public ActionResult<dynamic> Get() {
+            return Ok("teste");
+        }
     }
 }
