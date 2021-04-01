@@ -1,4 +1,7 @@
 using System;
+using System.IO;
+using System.Net;
+using System.Net.Mail;
 using condominioApi.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,11 +18,17 @@ using Microsoft.AspNetCore.Http;
 */
 namespace condominioApi.Services
 {
+
     public class UserService
     {
+        private string URL = "https://localhost:5001/";
+        private double _timeExpiredTokenEMAIL = 0.5;
         public BsonDocument RetornaUserAdm(UserAdm user)
         {
-
+            if (user.image == null)
+            {
+                user.image = new byte[1];
+            }
             return new BsonDocument{
                     {"_id", ObjectId.GenerateNewId()},
                     {"email", user.email.ToLower()},
@@ -29,11 +38,12 @@ namespace condominioApi.Services
                     {"endereco", user.endereco},
                     {"nameCondominio", user.nameCondominio},
                     {"image", user.image},
+                    {"verificado" , false},
                     {"role", "Administrator"},
                     {"datacreate", DateTimeOffset.Now.ToUnixTimeSeconds()}
                 };
         }
-        public BsonDocument RetornaUserRef(UserGeneric user)
+        public BsonDocument RetornaUserRef(UserGenericLogin user)
         {
             if (user.GetType() == new UserAdm().GetType())
             {
@@ -62,6 +72,10 @@ namespace condominioApi.Services
         }
         public BsonDocument RetornaUserPorteiro(UserPorteiro user)
         {
+            if (user.image == null)
+            {
+                user.image = new byte[1];
+            }
             return new BsonDocument{
                     {"_id", ObjectId.GenerateNewId()},
                     {"email", user.email.ToLower()},
@@ -75,6 +89,10 @@ namespace condominioApi.Services
         }
         public BsonDocument RetornaUserMorador(UserMorador user)
         {
+            if (user.image == null)
+            {
+                user.image = new byte[1];
+            }
             return new BsonDocument{
                     {"_id", ObjectId.GenerateNewId()},
                     {"email", user.email.ToLower()},
@@ -89,12 +107,12 @@ namespace condominioApi.Services
 
                 };
         }
-        public Boolean EmailExist(UserGeneric user, IMongoClient database)
+        public Boolean EmailExist(UserGenericLogin user, IMongoClient database)
         {
 
             try
             {
-                if (user is UserAdm  || user is  UserPorteiro)
+                if (user is UserAdm || user is UserPorteiro)
                 {
 
                     if (database.GetDatabase("userscondominio").GetCollection<UserReferencia>("users").Find(UserReferencia => UserReferencia.email == user.email).ToList().Count >= 1)
@@ -102,7 +120,7 @@ namespace condominioApi.Services
                         return true;
                     }
                 }
-                else if (user is UserGenericLogin)
+                else if (user is UserMorador)
                 {
                     if (database.GetDatabase(RemoverCaracterEspecial(user.nameCondominio)).GetCollection<UserMorador>("usersMoradores").Find(UserMorador => UserMorador.email == user.email).ToList().Count > 0)
                     {
@@ -139,7 +157,7 @@ namespace condominioApi.Services
             }
 
         }
-        public string GenerateToken(UserGeneric user)
+        public string GenerateToken(UserGenericLogin user, double horas)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(Settings.Secret);
@@ -152,7 +170,7 @@ namespace condominioApi.Services
                     new Claim(ClaimTypes.Role, user.role.ToString()),
 
                 }),
-                Expires = DateTime.UtcNow.AddHours(10),
+                Expires = DateTime.UtcNow.AddHours(horas),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -248,6 +266,10 @@ namespace condominioApi.Services
 
             return str;
         }
+        public string RemoverBarraToken(string str)
+        {
+            return str.Replace("/","");
+        }
         public string BloquarUser(HttpRequest request)
         {
             String ip = request.HttpContext.Connection.RemoteIpAddress.ToString();
@@ -255,6 +277,65 @@ namespace condominioApi.Services
 
             return "";
         }
-       
+        public void SendEmail(Email email)
+        {
+            SmtpClient client = new SmtpClient("smtp.gmail.com", 587);
+            client.Credentials = new NetworkCredential("seunegocioonlineagr@gmail.com", "35141543Rd");
+            client.UseDefaultCredentials = false;
+            client.EnableSsl = true;
+            client.DeliveryMethod = SmtpDeliveryMethod.Network;
+
+
+            string to = email.email;
+            string from = "noreply@noreply.com";
+            MailMessage message = new MailMessage(from, to);
+            message.IsBodyHtml = true;
+            message.Subject = email.titulo;
+            message.Body = email.body;
+            try
+            {
+                client.Send(message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("\n",
+                    e.ToString());
+            }
+        }
+        public void EmailConfimacao(UserGenericLogin user)
+        {
+            string url = URL + "api/confirmacaoEmail";
+            Email email = new Email();
+            email.email = user.email;
+            email.titulo = "Redefinição de Senha";
+            string image = "https://tse2.mm.bing.net/th?id=OIP.h3Eqt3wBHuM0tMbslVUcdwHaEo&pid=Api&P=0&w=300&h=300";
+            string htmlimage = "<img src=" + image + " />";
+            string html = string.Empty;
+            string link = "<p><a href='" + url + "?token=" + GenerateToken(user, _timeExpiredTokenEMAIL) + "/'>Confirme Seu Email</a></p>";
+            html = new StreamReader("C:\\Users\\Rodolfo\\git\\condominioApi\\Templates\\confirmed.html").ReadToEnd();
+            html = html.Replace("<image/>", htmlimage);
+            email.body = $"{html.Trim() + "\n" + link}";
+            SendEmail(email);
+
+        }
+        public void EmailDeRedefinicaoDeSenha(UserGenericLogin user)
+        {
+            string url = URL + "api/editarsenha";
+            Email email = new Email();
+            email.email = user.email;
+            email.titulo = "Redefinição de Senha";
+            string image = "https://tse2.mm.bing.net/th?id=OIP.h3Eqt3wBHuM0tMbslVUcdwHaEo&pid=Api&P=0&w=300&h=300";
+            string htmlimage = "<img src=" + image + " />";
+            string html = string.Empty;
+            string link = "<p><a href='" + url + "?token=" + GenerateToken(user, _timeExpiredTokenEMAIL) + "/'>Altere Sua Senha</a></p>";
+            html = new StreamReader("C:\\Users\\Rodolfo\\git\\condominioApi\\Templates\\confirmed.html").ReadToEnd();
+            html = html.Replace("<image/>", htmlimage);
+            email.body = $"{html.Trim() + "\n" + link}";
+            SendEmail(email);
+
+        }
+
+
+
     }
 }

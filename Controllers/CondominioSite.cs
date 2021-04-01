@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using condominioApi.Models;
 using condominioApi.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
 
 namespace condominioApi.Controllers
 {
@@ -34,18 +35,46 @@ namespace condominioApi.Controllers
         [Authorize(Roles = "Administrator")]
         public ActionResult<dynamic> RegisterMorador([FromForm] UserMorador user) => _condominioService.RegisterMorador(user, Request);
 
-        [HttpPost("cadastroAvisos")]
+        [HttpPost("cadastroComunicado")]
         [Authorize(Roles = "Administrator")]
-        public ActionResult<dynamic> CadastroAvisos([FromForm] Aviso texto) => _condominioService.CadastroAvisos(texto, Request);
+        public ActionResult<dynamic> CadastroComunicado([FromForm] Aviso texto) => _condominioService.CadastroComunicado(texto, Request);
 
         [HttpPost("criarAgendamento")]
         [Authorize(Roles = "Administrator")]
         public ActionResult<dynamic> CriarAgendamento([FromForm] Agendamento agend) => _condominioService.CriarAgendamento(agend, Request);
-        
-        [HttpPost("enviarfoto")]
-        public ActionResult<dynamic> EnviarFoto() => _condominioService.EnviarFoto(Request);
+
+        [HttpPost("editFoto")]
+        public ActionResult<dynamic> EnviarFoto([FromForm] byte[] foto) => _condominioService.EnviarFoto(foto, Request);
+
+        [HttpPut("editAgendamento")]
+        [Authorize(Roles = "Administrator")]
+        public ActionResult<dynamic> EditarAgendamento([FromForm] Agendamento agend) => _condominioService.EditarAgendamento(agend, Request);
+
+        [HttpGet("listaAgendamentos")]
+        public ActionResult<dynamic> ListaAgendamentos() => _condominioService.ListaAgendamentos(Request);
+
+        [HttpGet("listaItensAgendamentos")]
+        public ActionResult<dynamic> ListaItensAgendamentos([FromForm] ObjectBase obj) => _condominioService.ListaItensAgendamentos(obj, Request);
+
+        [HttpGet("configAgendamentos")]
+        public ActionResult<dynamic> GetConfigAgendamentos([FromForm] ObjectBase obj) => _condominioService.GetConfigAgendamentos(obj, Request);
+
+        [HttpGet("comunicados")]
+        public ActionResult<dynamic> GetAgendamento() => _condominioService.GetAgendamento(Request);
+
+        [HttpGet("confirmacaoEmail")]
+        public ActionResult<dynamic> ConfirmacaoEmail([FromQuery] [Required] string token) => _condominioService.ConfirmacaoEmail(token,Request);
 
 
+        [HttpGet("recuperarSenhaCondominio")]
+        public ActionResult<dynamic> EditarSenha([FromQuery] [Required] string token,[FromQuery] [Required] string senha) => _condominioService.EditarSenha(token, senha,Request);
+
+        [HttpPut("alterarSenha")]
+        public ActionResult<dynamic> AlterarSenha([FromQuery] [Required] string senha) => _condominioService.AlterarSenha(senha,Request);
+
+
+        [HttpPost("esqueciMinhaSenha")]
+        public ActionResult<dynamic> RedefinirSenha([FromForm] [Required] RedefinirSenha red) => _condominioService.RedefinirSenha(red,Request);
 
     }
 }

@@ -23,12 +23,8 @@ namespace condominioApi.Controllers
         [HttpGet("listacondominios")]
         public ActionResult<dynamic> GetListNameDatabase() => _condominioService.GetListNameDatabase();
 
-        [HttpPost("listaagendamentos")]
-        //[Authorize(Roles = "Morador")]
-        public ActionResult<dynamic> ListaAgendamentos() => _condominioService.ListaAgendamentos(Request);
-
-        [HttpPost("cadastrarAgendamento")]
+        [HttpPost("agendar")]
         [Authorize(Roles = "Morador")]
-        public ActionResult<dynamic> CadastrarAgendamento([FromForm] CriacaoAgendamento agend, [FromForm] [Required] string name) => _condominioService.CadastrarAgendamento(agend,name, Request);
+        public ActionResult<dynamic> CadastrarAgendamento([FromForm] CriacaoAgendamento agend, [FromForm] [Required] string itemNome) => _condominioService.CadastrarAgendamento(agend,itemNome, Request);
     }
 }
