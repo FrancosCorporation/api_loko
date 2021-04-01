@@ -12,7 +12,8 @@ namespace condominioApi.Services
 
     public class CondominioService : ControllerBase
     {
-        private readonly UserService userservice = new UserService();
+        private readonly UserService userService = new UserService();
+        private readonly ObjectsService objectsService = new ObjectsService();
         private readonly IMongoDatabase _condominiosDatabase;
         private readonly MongoClient _clientMongoDb;
 
@@ -39,6 +40,48 @@ namespace condominioApi.Services
 
             return listNameDatabase;
         }
+        public List<string> ListaAgendamentos(HttpRequest request)
+        {
+            JObject jsonClaim = userService.UnGenereteToken(request);
+            string nameCondominio = jsonClaim["nameCondominio"].ToString();
+            IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameCondominio));
+            {
+
+                List<string> listNameCollection = new List<string>();
+
+                using (var cursor = _newDatabase.ListCollectionNames())
+                {
+                    while (cursor.MoveNext())
+                    {
+                        foreach (var current in cursor.Current)
+                        {
+                            if (current != "avisos" && current != "configApp" && current != "usersAdm" && current != "usersPorteiros" && current != "usersMoradores") listNameCollection.Add(current);
+                        }
+                    }
+                }
+
+                return listNameCollection;
+            }
+
+        }
+        public dynamic GetInfoUser(HttpRequest request)
+        {
+
+
+            if (userService.ValidateToken(request))
+            {
+                JObject jsonClaim = userService.UnGenereteToken(request);
+                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(jsonClaim["database"].ToString());
+                IMongoCollection<UserAdm> _users = _newDatabase.GetCollection<UserAdm>("users");
+                UserAdm _user = _users.Find(_user => _user.id == jsonClaim["objectId"].ToString()).ToList()[0];
+                _user.password = "Não veja";
+                return Ok(_user);
+            }
+            else
+            {
+                return Unauthorized("Token Inválido");
+            }
+        }
         public dynamic LoginCondominio(UserGeneric user, HttpRequest request)
         {
             try
@@ -49,7 +92,7 @@ namespace condominioApi.Services
                 UserReferencia userref = _users2.Find(userref => userref.email == user.email).ToList()[0];
 
                 //password para hash
-                string _passwordSHA256 = userservice.passwordToHash(user.password);
+                string _passwordSHA256 = userService.passwordToHash(user.password);
                 _newDatabase = _clientMongoDb.GetDatabase(userref.databaseName);
 
 
@@ -57,14 +100,14 @@ namespace condominioApi.Services
                 {
                     IMongoCollection<UserAdm> _users = _newDatabase.GetCollection<UserAdm>("usersAdm");
                     UserAdm _user = _users.Find(_user => _user.email == user.email & _user.password == _passwordSHA256).ToList()[0];
-                    string _tokenUser = userservice.GenerateToken(_user);
+                    string _tokenUser = userService.GenerateToken(_user);
                     return Ok(new { token = _tokenUser });
                 }
                 else if (userref.role == "Porteiro")
                 {
                     IMongoCollection<UserPorteiro> _users = _newDatabase.GetCollection<UserPorteiro>("usersPorteiros");
                     UserPorteiro _user = _users.Find(_user => _user.email == user.email & _user.password == _passwordSHA256).ToList()[0];
-                    string _tokenUser = userservice.GenerateToken(_user);
+                    string _tokenUser = userService.GenerateToken(_user);
                     return Ok(new { token = _tokenUser });
                 }
                 return StatusCode(400);
@@ -81,12 +124,12 @@ namespace condominioApi.Services
             try
             {
                 //password para hash
-                string _passwordSHA256 = userservice.passwordToHash(user.password);
-                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userservice.RemoverCaracterEspecial(user.nameCondominio));
+                string _passwordSHA256 = userService.passwordToHash(user.password);
+                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio));
 
                 IMongoCollection<UserMorador> _users = _newDatabase.GetCollection<UserMorador>("usersMoradores");
                 UserMorador _user = _users.Find(_user => _user.email == user.email & _user.password == _passwordSHA256).ToList()[0];
-                string _tokenUser = userservice.GenerateToken(_user);
+                string _tokenUser = userService.GenerateToken(_user);
                 return Ok(new { token = _tokenUser });
 
 
@@ -102,7 +145,7 @@ namespace condominioApi.Services
 
             try
             {
-                if (!userservice.EmailExist(user, _clientMongoDb))
+                if (!userService.EmailExist(user, _clientMongoDb))
                 {
 
                     if (verificardatabaseexist(user))
@@ -112,26 +155,25 @@ namespace condominioApi.Services
                     else
                     {
                         //criando ou pegando o banco de dados com o nome do condiminio
-                        IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userservice.RemoverCaracterEspecial(user.nameCondominio));
+                        IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio));
                         //usando o banco para criar as collections
                         _newDatabase.CreateCollection("usersAdm");
                         _newDatabase.CreateCollection("usersPorteiros");
                         _newDatabase.CreateCollection("usersMoradores");
-                        _newDatabase.CreateCollection("config_app");
-                        _newDatabase.CreateCollection("academia");
+                        _newDatabase.CreateCollection("configApp");
                         _newDatabase.CreateCollection("avisos");
 
-                        _newDatabase.GetCollection<BsonDocument>("usersAdm").InsertOne(userservice.RetornaUserAdm(user));
+                        _newDatabase.GetCollection<BsonDocument>("usersAdm").InsertOne(userService.RetornaUserAdm(user));
 
                         _newDatabase = _clientMongoDb.GetDatabase("userscondominio");
                         if (_newDatabase.GetCollection<BsonDocument>("users") == null)
                         {
                             _newDatabase.CreateCollection("users");
-                            _newDatabase.GetCollection<BsonDocument>("users").InsertOne(userservice.RetornaUserRef(user));
+                            _newDatabase.GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
                         }
                         else
                         {
-                            _newDatabase.GetCollection<BsonDocument>("users").InsertOne(userservice.RetornaUserRef(user));
+                            _newDatabase.GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
                         }
 
                         return Ok("Condominio " + user.nameCondominio + " cadastrado com sucesso!");
@@ -156,37 +198,32 @@ namespace condominioApi.Services
         }
         public dynamic RegisterPorteiro(UserPorteiro user, HttpRequest request)
         {
-            if (userservice.ValidateToken(request) & userservice.UnGenereteToken(request)["role"].ToString() == "Administrator")
-            {
-                JObject jsonClaim = userservice.UnGenereteToken(request);
-                user.nameCondominio = jsonClaim["nameCondominio"].ToString();
-                if (!userservice.EmailExist(user, _clientMongoDb))
-                {
-                    _clientMongoDb.GetDatabase(userservice.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersPorteiros").InsertOne(userservice.RetornaUserPorteiro(user));
-                    _clientMongoDb.GetDatabase("userscondominio").GetCollection<BsonDocument>("users").InsertOne(userservice.RetornaUserRef(user));
-                    return Ok(user.nome + " Cadastrado com sucesso.");
 
-                }
-                else
-                {
-                    return Conflict("Email Já Cadastrado");
-                }
+            JObject jsonClaim = userService.UnGenereteToken(request);
+            user.nameCondominio = jsonClaim["nameCondominio"].ToString();
+            if (!userService.EmailExist(user, _clientMongoDb))
+            {
+                _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersPorteiros").InsertOne(userService.RetornaUserPorteiro(user));
+                _clientMongoDb.GetDatabase("userscondominio").GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
+                return Ok(user.nome + " Cadastrado com sucesso.");
+
             }
             else
             {
-                return Unauthorized("Token Invalido");
+                return Conflict("Email Já Cadastrado");
             }
+
         }
         public dynamic RegisterMorador(UserMorador user, HttpRequest request)
         {
-            if (userservice.ValidateToken(request) & userservice.UnGenereteToken(request)["role"].ToString() == "Administrator")
+            if (userService.ValidateToken(request) & userService.UnGenereteToken(request)["role"].ToString() == "Administrator")
             {
-                JObject jsonClaim = userservice.UnGenereteToken(request);
+                JObject jsonClaim = userService.UnGenereteToken(request);
                 user.nameCondominio = jsonClaim["nameCondominio"].ToString();
-                if (!userservice.EmailExist(user, _clientMongoDb))
+                if (!userService.EmailExist(user, _clientMongoDb))
                 {
 
-                    _clientMongoDb.GetDatabase(userservice.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersMoradores").InsertOne(userservice.RetornaUserMorador(user));
+                    _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersMoradores").InsertOne(userService.RetornaUserMorador(user));
                     return Ok("Morador " + user.nome + " Cadastrado com sucesso.");
 
                 }
@@ -200,29 +237,82 @@ namespace condominioApi.Services
                 return Unauthorized("Token Invalido");
             }
         }
-        public dynamic GetInfoUser(HttpRequest request)
+        public dynamic CadastroAvisos(Aviso texto, HttpRequest request)
         {
+            try
+            {
+
+                JObject jsonClaim = userService.UnGenereteToken(request);
+                string nameCondominio = jsonClaim["nameCondominio"].ToString();
+                _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameCondominio)).GetCollection<BsonDocument>("avisos").InsertOne(objectsService.RetornaAviso(texto));
 
 
-            if (userservice.ValidateToken(request))
-            {
-                JObject jsonClaim = userservice.UnGenereteToken(request);
-                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(jsonClaim["database"].ToString());
-                IMongoCollection<UserAdm> _users = _newDatabase.GetCollection<UserAdm>("users");
-                UserAdm _user = _users.Find(_user => _user.id == jsonClaim["objectId"].ToString()).ToList()[0];
-                _user.password = "Não veja";
-                return Ok(_user);
+                return Ok("Aviso" + texto.titulo + " cadastrado com Sucesso");
             }
-            else
+            catch (System.Exception)
             {
-                return Unauthorized("Token Inválido");
+                return Conflict();
             }
+
+        }
+        public dynamic CriarAgendamento(Agendamento agend, HttpRequest request)
+        {
+            try
+            {
+                JObject jsonClaim = userService.UnGenereteToken(request);
+                string nameCondominio = jsonClaim["nameCondominio"].ToString();
+                IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+                db.GetCollection<BsonDocument>("configApp").InsertOne(objectsService.RetornaAgendamento(agend));
+                db.CreateCollection(userService.RemoverCaracterEspecialDeixarEspaco(agend.itemNome));
+                return Ok(agend.itemNome + " para agendamentos cadastrado com Sucesso");
+            }
+            catch (System.Exception e)
+            {
+                Console.Write(e);
+                return Conflict();
+            }
+
+        }
+        public dynamic CadastrarAgendamento(CriacaoAgendamento agend, String name, HttpRequest request)
+        {
+            try
+            {
+                JObject jsonClaim = userService.UnGenereteToken(request);
+                string nameCondominio = jsonClaim["nameCondominio"].ToString();
+                IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+                db.GetCollection<BsonDocument>(userService.RemoverCaracterEspecialDeixarEspaco(name)).InsertOne(objectsService.RetornaCriacaoAgendamento(agend, request));
+                return Ok("Agendado em "+name+" para "+ agend.dateAgendamento +", Sucesso !");
+            }
+            catch (System.Exception e)
+            {
+                Console.Write(e);
+                return Conflict();
+            }
+
+        }
+        public dynamic EnviarFoto(HttpRequest request)
+        {
+            try
+            {
+                //byte[] image = request.Body.; 
+                //String oi = request.Body.;
+                //Console.Write(oi);
+                //FileStream fileStream = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
+                return Ok("ok");
+
+
+            }
+            catch (System.Exception)
+            {
+                return Conflict("erro");
+            }
+
         }
         public Boolean verificardatabaseexist(UserAdm user)
         {
             try
             {
-                if (_clientMongoDb.GetDatabase(userservice.RemoverCaracterEspecial(user.nameCondominio)).ListCollections().ToList().Count > 0)
+                if (_clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio)).ListCollections().ToList().Count > 0)
                 {
                     return true;
                 }

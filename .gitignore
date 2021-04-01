@@ -2,3 +2,6 @@
 bin
 .env
 Properties
+*.mdmp
+obj
+bin\Debug
