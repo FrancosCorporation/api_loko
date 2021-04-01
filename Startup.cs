@@ -19,20 +19,21 @@ namespace condominioApi
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            Thread t = new Thread(initDb);
-            t.Start();
-            Thread.Sleep(300);
             Console.Write("\nDate Up Server :" + DateTime.UtcNow+ "\n"+"\n");
         }
         
-        public void initDb() {
-            string command = "--dbpath db";
-            System.Diagnostics.Process.Start("mongod.exe", command);
-        }
         public IConfiguration Configuration { get; }
+
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
     
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.AddCors(options => {
+                options.AddDefaultPolicy(builder => {
+                    builder.AllowAnyOrigin();
+                });
+            });
 
             //Configurando o acesso ao MongoDb
             services.Configure<CondominioDatabaseSetting>(
@@ -44,6 +45,7 @@ namespace condominioApi
                 sp.GetRequiredService<IOptions<CondominioDatabaseSetting>>().Value);
 
             services.AddSingleton<CondominioService>();
+            services.AddSingleton<PaymentService>();
 
 
             services.AddControllers();
@@ -72,6 +74,9 @@ namespace condominioApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+            app.UseCors(MyAllowSpecificOrigins);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
