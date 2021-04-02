@@ -1,3 +1,6 @@
 .vscode
 bin
+.env
+Properties
 *.mdmp
+obj
