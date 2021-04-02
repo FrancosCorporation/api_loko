@@ -505,7 +505,7 @@ namespace condominioApi.Services
                     {
                         string nameCollection = "usersAdm";
                         IMongoCollection<UserAdm> _users = db.GetCollection<UserAdm>(nameCollection);
-                        UserAdm _user = _users.Find(_user => _user.email == red.email).ToList()[0];
+                        UserAdm _user = _users.Find(_user => _user.email == red.email).Limit(1).ToList()[0];
                         string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
                         userService.EmailDeRedefinicaoDeSenha(_user);
                         return Ok("Verique seu email (Valido por 30 minutos)");
