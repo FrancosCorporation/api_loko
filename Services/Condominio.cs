@@ -6,23 +6,25 @@ using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
-
+using Atividio.Validadores.Cnpj;
 namespace condominioApi.Services
 {
 
     public class CondominioService : ControllerBase
     {
-        private readonly UserService userService = new UserService();
+        private readonly UserService userService;
         private readonly ObjectsService objectsService = new ObjectsService();
-        private readonly IMongoDatabase _condominiosDatabase;
+        private readonly CnpjValidador cnpjValidador = new CnpjValidador();
+
         private readonly MongoClient _clientMongoDb;
         private double _timeExpiredTokenLogin = 10;
-
+        public CondominioService() { }
         public CondominioService(ICondominioDatabaseSetting setting)
         {
             var client = new MongoClient(setting.ConnectionString);
             _clientMongoDb = client;
-            _condominiosDatabase = client.GetDatabase(setting.DatabaseName);
+            userService = new UserService(setting);
+            // _condominiosDatabase = client.GetDatabase(setting.DatabaseName);
         }
         public List<string> GetListNameDatabase()
         {
@@ -114,10 +116,17 @@ namespace condominioApi.Services
                 }
                 else if (userref.role == "Porteiro")
                 {
-                    IMongoCollection<UserPorteiro> _users = _newDatabase.GetCollection<UserPorteiro>("usersPorteiros");
-                    UserPorteiro _user = _users.Find(_user => _user.email == user.email & _user.password == _passwordSHA256).ToList()[0];
-                    string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
-                    return Ok(new { token = _tokenUser });
+                    if (userService.verificaPagamento(userref.nameCondominio))
+                    {
+                        IMongoCollection<UserPorteiro> _users = _newDatabase.GetCollection<UserPorteiro>("usersPorteiros");
+                        UserPorteiro _user = _users.Find(_user => _user.email == user.email & _user.password == _passwordSHA256).ToList()[0];
+                        string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
+                        return Ok(new { token = _tokenUser });
+                    }
+                    else
+                    {
+                        return Unauthorized("Pagamento não localizado para o mês, converse com o seu Sindico.");
+                    }
                 }
                 return BadRequest();
 
@@ -132,14 +141,31 @@ namespace condominioApi.Services
         {
             try
             {
-                //password para hash
-                string _passwordSHA256 = userService.passwordToHash(user.password);
-                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio));
+                if (VerificarDatabaseExist(user.nameCondominio))
+                {
+                    if (userService.verificaPagamento(user.nameCondominio))
+                    {
+                        //password para hash
+                        string _passwordSHA256 = userService.passwordToHash(user.password);
+                        IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio));
 
-                IMongoCollection<UserMorador> _users = _newDatabase.GetCollection<UserMorador>("usersMoradores");
-                UserMorador _user = _users.Find(_user => _user.email == user.email & _user.password == _passwordSHA256).ToList()[0];
-                string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
-                return Ok(new { token = _tokenUser });
+                        IMongoCollection<UserMorador> _users = _newDatabase.GetCollection<UserMorador>("usersMoradores");
+                        UserMorador _user = _users.Find(_user => _user.email == user.email & _user.password == _passwordSHA256).ToList()[0];
+                        string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
+                        return Ok(new { token = _tokenUser });
+                    }
+                    else
+                    {
+                        return Unauthorized("Pagamento não localizado para o mês, converse com o seu Sindico.");
+                    }
+                }
+                else
+                {
+                    return NotFound(user.nameCondominio + " Não existe.");
+                }
+
+
+
 
 
             }
@@ -163,32 +189,40 @@ namespace condominioApi.Services
                     }
                     else
                     {
-                        //criando ou pegando o banco de dados com o nome do condiminio
-                        IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio));
-                        //usando o banco para criar as collections
-                        _newDatabase.CreateCollection("usersAdm");
-                        _newDatabase.CreateCollection("usersPorteiros");
-                        _newDatabase.CreateCollection("usersMoradores");
-                        _newDatabase.CreateCollection("configApp");
-                        _newDatabase.CreateCollection("avisos");
-
-                        BsonDocument novoAdm = userService.RetornaUserAdm(user);
-                        _newDatabase.GetCollection<BsonDocument>("usersAdm").InsertOne(novoAdm);
-
-                        _newDatabase = _clientMongoDb.GetDatabase("userscondominio");
-                        if (_newDatabase.GetCollection<BsonDocument>("users") == null)
+                        if (!cnpjValidador.IsValid(user.cnpj))
                         {
-                            _newDatabase.CreateCollection("users");
-                            _newDatabase.GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
+                            //criando ou pegando o banco de dados com o nome do condiminio
+                            IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio));
+                            //usando o banco para criar as collections
+                            _newDatabase.CreateCollection("usersAdm");
+                            _newDatabase.CreateCollection("usersPorteiros");
+                            _newDatabase.CreateCollection("usersMoradores");
+                            _newDatabase.CreateCollection("configApp");
+                            _newDatabase.CreateCollection("avisos");
+                            _newDatabase.CreateCollection("historicoPagamnto");
+
+                            BsonDocument novoAdm = userService.RetornaUserAdm(user);
+                            _newDatabase.GetCollection<BsonDocument>("usersAdm").InsertOne(novoAdm);
+
+                            _newDatabase = _clientMongoDb.GetDatabase("userscondominio");
+                            if (_newDatabase.GetCollection<BsonDocument>("users") == null)
+                            {
+                                _newDatabase.CreateCollection("users");
+                                _newDatabase.GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
+                            }
+                            else
+                            {
+                                _newDatabase.GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
+                            }
+                            user.role = "Administrator";
+                            user.id = novoAdm["_id"].ToString();
+                            userService.EmailConfimacao(user);
+                            return Ok("Condominio " + user.nameCondominio + " cadastrado com sucesso!");
                         }
                         else
                         {
-                            _newDatabase.GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
+                            return StatusCode(406, "Cnpj invalido");
                         }
-                        user.role = "Administrator";
-                        user.id = novoAdm["_id"].ToString();
-                        userService.EmailConfimacao(user);
-                        return Ok("Condominio " + user.nameCondominio + " cadastrado com sucesso!");
 
                     }
 
@@ -215,10 +249,24 @@ namespace condominioApi.Services
             user.nameCondominio = jsonClaim["nameCondominio"].ToString();
             if (!userService.EmailExist(user, _clientMongoDb))
             {
-                _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersPorteiros").InsertOne(userService.RetornaUserPorteiro(user));
-                _clientMongoDb.GetDatabase("userscondominio").GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
-                return Ok(user.nome + " Cadastrado com sucesso.");
+                if (userService.verificaEmailConfirmado(user.nameCondominio))
+                {
+                    if (userService.verificaPagamento(user.nameCondominio))
+                    {
+                        _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersPorteiros").InsertOne(userService.RetornaUserPorteiro(user));
+                        _clientMongoDb.GetDatabase("userscondominio").GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
+                        return Ok(user.nome + " Cadastrado com sucesso.");
+                    }
+                    else
+                    {
+                        return Unauthorized("Pagamento não localizado para o mês, converse com o seu Sindico.");
+                    }
 
+                }
+                else
+                {
+                    return Unauthorized("Email não confirmado");
+                }
             }
             else
             {
@@ -233,9 +281,23 @@ namespace condominioApi.Services
             user.nameCondominio = jsonClaim["nameCondominio"].ToString();
             if (!userService.EmailExist(user, _clientMongoDb))
             {
+                if (userService.verificaEmailConfirmado(user.nameCondominio))
+                {
+                    if (userService.verificaPagamento(user.nameCondominio))
+                    {
+                        _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersMoradores").InsertOne(userService.RetornaUserMorador(user));
+                        return Ok("Morador " + user.nome + " Cadastrado com sucesso.");
+                    }
+                    else
+                    {
+                        return Unauthorized("Pagamento não localizado para o mês, converse com o seu Sindico.");
+                    }
 
-                _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersMoradores").InsertOne(userService.RetornaUserMorador(user));
-                return Ok("Morador " + user.nome + " Cadastrado com sucesso.");
+                }
+                else
+                {
+                    return Unauthorized("Email não confirmado");
+                }
 
             }
             else
@@ -248,13 +310,29 @@ namespace condominioApi.Services
         {
             try
             {
-
                 JObject jsonClaim = userService.UnGenereteToken(request);
                 string nameCondominio = jsonClaim["nameCondominio"].ToString();
-                _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameCondominio)).GetCollection<BsonDocument>("avisos").InsertOne(objectsService.RetornaAviso(texto));
+                if (userService.verificaEmailConfirmado(nameCondominio))
+                {
+                    if (userService.verificaPagamento(nameCondominio))
+                    {
+                        _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameCondominio)).GetCollection<BsonDocument>("avisos").InsertOne(objectsService.RetornaAviso(texto));
+                        return Ok("Aviso " + texto.titulo + " cadastrado com Sucesso");
+                    }
+                    else
+                    {
+                        return Unauthorized("Pagamento não localizado para o mês, converse com o seu Sindico.");
+                    }
 
 
-                return Ok("Aviso " + texto.titulo + " cadastrado com Sucesso");
+                }
+
+                else
+                {
+
+
+                    return Unauthorized("Email não confirmado");
+                }
             }
             catch (System.Exception)
             {
@@ -269,16 +347,33 @@ namespace condominioApi.Services
                 JObject jsonClaim = userService.UnGenereteToken(request);
                 string nameCondominio = jsonClaim["nameCondominio"].ToString();
                 string nameCollection = "configApp";
-                if (!verificarAgendamentosExist(nameCondominio, agend.itemNome, nameCollection))
+                if (userService.verificaEmailConfirmado(nameCondominio))
                 {
-                    IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                    db.GetCollection<BsonDocument>(nameCollection).InsertOne(objectsService.RetornaAgendamento(agend));
-                    db.CreateCollection(userService.RemoverCaracterEspecialDeixarEspaco(agend.itemNome));
-                    return Ok(agend.itemNome + " para agendamentos cadastrado com Sucesso");
+                    if (userService.verificaPagamento(nameCondominio))
+                    {
+                        if (!verificarAgendamentosExist(nameCondominio, agend.itemNome, nameCollection))
+                        {
+
+                            IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+                            db.GetCollection<BsonDocument>(nameCollection).InsertOne(objectsService.RetornaAgendamento(agend));
+                            db.CreateCollection(userService.RemoverCaracterEspecialDeixarEspaco(agend.itemNome));
+                            return Ok(agend.itemNome + " para agendamentos cadastrado com Sucesso");
+
+                        }
+                        else
+                        {
+                            return Conflict(agend.itemNome + " Já está cadastrado !");
+                        }
+                    }
+                    else
+                    {
+                        return Unauthorized("Pagamento não localizado para o mês, converse com o seu Sindico.");
+                    }
+
                 }
                 else
                 {
-                    return Conflict(agend.itemNome + " Já está cadastrado !");
+                    return Unauthorized("Email não confirmado");
                 }
 
             }
@@ -294,9 +389,24 @@ namespace condominioApi.Services
             try
             {
                 string nameCondominio = userService.UnGenereteToken(request)["nameCondominio"].ToString();
-                IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                db.GetCollection<BsonDocument>(userService.RemoverCaracterEspecialDeixarEspaco(name)).InsertOne(objectsService.RetornaCriacaoAgendamento(agend, request));
-                return Ok("Agendado em " + name + " para " + agend.dateAgendamento + ", Sucesso !");
+                if (userService.verificaEmailConfirmado(nameCondominio))
+                {
+                    if (userService.verificaPagamento(nameCondominio))
+                    {
+                        IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+                        db.GetCollection<BsonDocument>(userService.RemoverCaracterEspecialDeixarEspaco(name)).InsertOne(objectsService.RetornaCriacaoAgendamento(agend, request));
+                        return Ok("Agendado em " + name + " para " + agend.dateAgendamento + ", Sucesso !");
+                    }
+                    else
+                    {
+                        return Unauthorized("Pagamento não localizado para o mês, converse com o seu Sindico.");
+                    }
+                }
+                else
+                {
+                    return Unauthorized("Email não confirmado");
+                }
+
             }
             catch (System.Exception e)
             {
@@ -311,19 +421,35 @@ namespace condominioApi.Services
             {
                 string nameCondominio = userService.UnGenereteToken(request)["nameCondominio"].ToString();
                 string nameCollection = "configApp";
-                if (verificarAgendamentosExist(nameCondominio, agend.itemNome, nameCollection))
+                if (userService.verificaEmailConfirmado(nameCondominio))
                 {
-                    IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                    BsonDocument old = GetBson(nameCondominio, agend.itemNome, nameCollection);
-                    BsonDocument novo = objectsService.RetornaAgendamento(agend);
-                    novo["_id"] = old["_id"];
-                    db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
-                    return Ok("Agendado em " + agend.itemNome + " alterado com Sucesso !");
+                    if (userService.verificaPagamento(nameCondominio))
+                    {
+
+                        if (verificarAgendamentosExist(nameCondominio, agend.itemNome, nameCollection))
+                        {
+                            IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+                            BsonDocument old = GetBson(nameCondominio, agend.itemNome, nameCollection);
+                            BsonDocument novo = objectsService.RetornaAgendamento(agend);
+                            novo["_id"] = old["_id"];
+                            db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
+                            return Ok("Agendado em " + agend.itemNome + " alterado com Sucesso !");
+                        }
+                        else
+                        {
+                            return Conflict(agend.itemNome + " não exite.");
+                        }
+                    }
+                    else
+                    {
+                        return Unauthorized("Pagamento não localizado para o mês, converse com o seu Sindico.");
+                    }
                 }
                 else
                 {
-                    return Conflict(agend.itemNome + " não exite.");
+                    return Unauthorized("Email não confirmado");
                 }
+
 
             }
             catch (System.Exception e)
@@ -494,6 +620,33 @@ namespace condominioApi.Services
                 return Unauthorized();
             }
         }
+        public dynamic EmailNaoConfirmado(ConfirmacaoEmail confirm, HttpRequest request)
+        {
+
+            if (VerificarDatabaseExist(confirm.nameCondominio))
+            {
+                IMongoDatabase db = _clientMongoDb.GetDatabase(confirm.nameCondominio);
+
+                try
+                {
+                    string nameCollection = "usersAdm";
+                    IMongoCollection<UserAdm> _users = db.GetCollection<UserAdm>(nameCollection);
+                    UserAdm _user = _users.Find(_user => _user.email == confirm.email).ToList()[0];
+                    userService.EmailConfimacao(_user);
+                    return Ok("Enviamos novamente um Email de confirmação, (Valido por 30 minutos)");
+                }
+                catch
+                {
+                    return NotFound("Usuario não encontrado");
+                }
+
+            }
+            else
+            {
+                return NotFound("Condominio não encontrado");
+            }
+
+        }
         public dynamic RedefinirSenha(RedefinirSenha red, HttpRequest request)
         {
             if (VerificarDatabaseExist(red.nameCondominio))
@@ -562,14 +715,30 @@ namespace condominioApi.Services
         {
             try
             {
+
                 if (userService.ValidateToken(request) & userService.UnGenereteToken(request)["role"].ToString() != "Morador")
                 {
-
                     string nameCondominio = userService.RemoverCaracterEspecial(userService.UnGenereteToken(request)["nameCondominio"].ToString());
-                    List<CriacaoAgendamento> list = new List<CriacaoAgendamento>();
-                    IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                    list = db.GetCollection<CriacaoAgendamento>(obj.itemNome).Find(_ => true).ToList();
-                    return RetornaListaComUserName(list, nameCondominio);
+                    if (userService.verificaEmailConfirmado(nameCondominio))
+                    {
+                        if (userService.verificaPagamento(nameCondominio))
+                        {
+
+                            List<CriacaoAgendamento> list = new List<CriacaoAgendamento>();
+                            IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+                            list = db.GetCollection<CriacaoAgendamento>(obj.itemNome).Find(_ => true).ToList();
+                            return RetornaListaComUserName(list, nameCondominio);
+                        }
+                        else
+                        {
+                            return Unauthorized("Pagamento não localizado para o mês, converse com o seu Sindico.");
+                        }
+                    }
+                    else
+                    {
+                        return Unauthorized("Email não confirmado");
+                    }
+
                 }
                 else
                 {
@@ -593,38 +762,52 @@ namespace condominioApi.Services
                     string role = userService.UnGenereteToken(request)["role"].ToString();
                     string id = userService.UnGenereteToken(request)["_id"].ToString();
                     string nameCondominio = userService.RemoverCaracterEspecial(userService.UnGenereteToken(request)["nameCondominio"].ToString());
+                     if (userService.verificaEmailConfirmado(nameCondominio))
+                    {
+                        if (userService.verificaPagamento(nameCondominio))
+                        {
+                            if (role == "Administrator")
+                            {
+                                string nameCollection = "usersAdm";
+                                IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+                                BsonDocument old = GetBson(nameCondominio, id, nameCollection);
+                                BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                                novo["image"] = foto;
+                                db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
+                                return Ok("Foto alterada com Sucesso !");
+                            }
+                            else if (role == "Porteiro")
+                            {
 
-                    if (role == "Administrator")
-                    {
-                        string nameCollection = "usersAdm";
-                        IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                        BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                        BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
-                        novo["image"] = foto;
-                        db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
-                        return Ok("Foto alterada com Sucesso !");
+                                string nameCollection = "usersPorteiros";
+                                IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+                                BsonDocument old = GetBson(nameCondominio, id, nameCollection);
+                                BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                                novo["image"] = foto;
+                                db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
+                                return Ok("Foto alterada com Sucesso !");
+                            }
+                            else if (role == "Morador")
+                            {
+                                string nameCollection = "usersMoradores";
+                                IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
+                                BsonDocument old = GetBson(nameCondominio, id, nameCollection);
+                                BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                                novo["image"] = foto;
+                                db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
+                                return Ok("Foto alterada com Sucesso !");
+                            }
+                        }
+                        else
+                        {
+                            return Unauthorized("Pagamento não localizado para o mês, converse com o seu Sindico.");
+                        }
                     }
-                    else if (role == "Porteiro")
+                    else
                     {
+                        return Unauthorized("Email não confirmado");
+                    }
 
-                        string nameCollection = "usersPorteiros";
-                        IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                        BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                        BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
-                        novo["image"] = foto;
-                        db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
-                        return Ok("Foto alterada com Sucesso !");
-                    }
-                    else if (role == "Morador")
-                    {
-                        string nameCollection = "usersMoradores";
-                        IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                        BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                        BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
-                        novo["image"] = foto;
-                        db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
-                        return Ok("Foto alterada com Sucesso !");
-                    }
                 }
 
                 return Unauthorized();

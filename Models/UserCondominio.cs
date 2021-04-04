@@ -6,14 +6,28 @@ namespace condominioApi.Models
 {
     public class UserAdm : UserGenericLogin
     {
+        
 
+        [Required]
+        public string numero { get; set; }
         [Required]
         public string estado { get; set; }
         [Required]
         public string cidade { get; set; }
         [Required]
-        public string endereco { get; set; }
-        public bool verificado {get; set;}
+        public string rua { get; set; }
+        [Required]
+        public string nome { get; set; }
+        [Required]
+        public string cnpj { get; set; }
+        [Required]
+        public string cep { get; set; }
+        public bool verificado { get; set; }
+        public string creditCardId { get; set; }
+        public string idSubscription { get; set; }
+        
+        public bool isPayment { get; set; }
+
 
 
     }

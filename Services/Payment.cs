@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using RestSharp;
-using Newtonsoft.Json;  
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using condominioApi.Models;
 using System.Net;
 using System;
+using Microsoft.AspNetCore.Http;
 
 namespace condominioApi.Services
 {
@@ -14,8 +15,9 @@ namespace condominioApi.Services
         //Gerar id card
         //Verificar plano
         //Assinar plano
+        UserService userService = new UserService();
 
-        private JunoAccessToken _validateAccessToken = new JunoAccessToken() {dateTimeGenerateAccessToken = new DateTime(1970)};
+        private JunoAccessToken _validateAccessToken = new JunoAccessToken() { dateTimeGenerateAccessToken = new DateTime(1970) };
 
         private string _baseUrl = "https://sandbox.boletobancario.com";
 
@@ -23,21 +25,46 @@ namespace condominioApi.Services
 
         public bool isTokenExpiration()
         {
-            if(DateTimeOffset.UtcNow.ToUnixTimeSeconds()-_validateAccessToken.dateTimeGenerateAccessToken.ToUnixTimeSeconds() > 3600) return true;
+            if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _validateAccessToken.dateTimeGenerateAccessToken.ToUnixTimeSeconds() > 3600) return true;
             return false;
         }
 
+        public ActionResult Payment(string cardHash, HttpRequest request)
+        {
+            dynamic _modelJuno;
+
+            dynamic _getAccessToken = getAccessToken();
+            _modelJuno = _getAccessToken;
+
+            if (!(_modelJuno is JunoError))
+            {
+                dynamic _tokenizacao = tokenizacao(cardHash, _getAccessToken);
+                _modelJuno = _tokenizacao;
+
+                if (!(_modelJuno is JunoError))
+                {
+                    dynamic _subscription = subscription(request, _getAccessToken, _tokenizacao);
+                    _modelJuno = _subscription;
+                }
+            }
+
+            return modelResponse(_modelJuno);
+        }
+
+
         public dynamic getAccessToken()
         {
-            if(isTokenExpiration()) {
+            if (isTokenExpiration())
+            {
                 var client = new RestClient($"{_baseUrl}/authorization-server/oauth/token");
                 var request = new RestRequest(Method.POST);
                 request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
                 request.AddHeader("Authorization", "Basic a2MxajR6bEdWM1FSdkFYbTpTZ2oyVzdGMXF3MWxhNWRHOytQVkVwak1lJHRqKSxkaA==");
                 request.AddParameter("grant_type", "client_credentials");
-                
+
                 IRestResponse response = client.Execute(request);
-                if(response.StatusCode == HttpStatusCode.OK) {
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
                     JunoAccessToken _junoAccessToken = JsonConvert.DeserializeObject<JunoAccessToken>(response.Content);
                     _junoAccessToken.dateTimeGenerateAccessToken = DateTimeOffset.UtcNow;
                     _validateAccessToken = _junoAccessToken;
@@ -59,11 +86,12 @@ namespace condominioApi.Services
                 {"X-Resource-Token", "85D4CF242645507CEE7332F4451BCBF398027EEA65B36135EA64B99036DD90D4"},
                 {"Content-Type", "application/json;charset=UTF-8"}
             });
-            request.AddJsonBody(new { creditCardHash = cardHash});
+            request.AddJsonBody(new { creditCardHash = cardHash });
 
             IRestResponse response = client.Execute(request);
 
-            if(response.StatusCode == HttpStatusCode.OK) {
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
                 JunoTokenizacao _junoTokenizacao = JsonConvert.DeserializeObject<JunoTokenizacao>(response.Content);
                 return _junoTokenizacao;
             }
@@ -71,8 +99,10 @@ namespace condominioApi.Services
             return _junoError;
         }
 
-        public dynamic subscription(JunoAccessToken junoAccessToken ,JunoTokenizacao junoTokenizacao)
+        public dynamic subscription(HttpRequest requestUser, JunoAccessToken junoAccessToken, JunoTokenizacao junoTokenizacao)
         {
+            UserAdm user = userService.RetornaUserAdmPorId(userService.UnGenereteToken(requestUser)["nameCondominio"].ToString(), userService.UnGenereteToken(requestUser)["objectId"].ToString());
+            user.creditCardId = junoTokenizacao.creditCardId;
             var client = new RestClient($"{_baseUrl}/api-integration/subscriptions");
             var request = new RestRequest(Method.POST);
             request.AddHeaders(new Dictionary<string, string>() {
@@ -81,31 +111,38 @@ namespace condominioApi.Services
                 {"X-Resource-Token", "85D4CF242645507CEE7332F4451BCBF398027EEA65B36135EA64B99036DD90D4"},
                 {"Content-Type", "application/json;charset=UTF-8"}
             });
-            request.AddJsonBody(new {
+            request.AddJsonBody(new
+            {
                 dueDay = DateTime.Now.Day,
                 planId = _planId,
                 chargeDescription = "Inscrição plano Condominio",
-                creditCardDetails = new {
+                creditCardDetails = new
+                {
                     creditCardId = junoTokenizacao.creditCardId,
                 },
-                billing = new {
-                    name = "Matheus",
-                    document = "51776993071",
-                    email = "mathlouly@gmail.com",
-                    address = new {
-                        street = "jamel Cecilio",
-                        number = "N/A",
-                        city = "Goiania",
-                        state = "GO",
-                        postCode = "74840540"
+                billing = new
+                {
+                    name = user.nome,
+                    document = user.cnpj,
+                    email = user.email,
+                    address = new
+                    {
+                        street = user.rua,
+                        number = user.numero,
+                        city = user.cidade,
+                        state = user.estado,
+                        postCode = user.cep
                     },
                 }
             });
 
             IRestResponse response = client.Execute(request);
 
-            if(response.StatusCode == HttpStatusCode.OK) {
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
                 JunoSubscription _junoSubscription = JsonConvert.DeserializeObject<JunoSubscription>(response.Content);
+                user.idSubscription = _junoSubscription.id;
+                userService.GravaUserAdm(user);
                 return _junoSubscription;
             }
             JunoError _junoError = JsonConvert.DeserializeObject<JunoError>(response.Content);
@@ -115,7 +152,8 @@ namespace condominioApi.Services
 
         public ActionResult modelResponse(dynamic modelJuno)
         {
-            switch(modelJuno.status) {
+            switch (modelJuno.status)
+            {
                 case 400:
                     return BadRequest(modelJuno);
                 case 401:
@@ -132,7 +170,7 @@ namespace condominioApi.Services
         public dynamic consultCharges(string idSubscription)
         {
             dynamic _getAccessToken = getAccessToken();
-            if(_getAccessToken is JunoError) return _getAccessToken;
+            if (_getAccessToken is JunoError) return _getAccessToken;
 
             var client = new RestClient($"{_baseUrl}/api-integration/charges");
             var request = new RestRequest(Method.GET);
@@ -145,14 +183,14 @@ namespace condominioApi.Services
 
             IRestResponse response = client.Execute(request);
 
-            if(response.StatusCode == HttpStatusCode.OK)
+            if (response.StatusCode == HttpStatusCode.OK)
             {
                 JunoEmbedded _junoEmbedded = JsonConvert.DeserializeObject<JunoEmbedded>(response.Content);
                 JunoCharges _junoCharges = _junoEmbedded._embedded;
 
                 foreach (var charge in _junoCharges.charges)
                 {
-                    if(idSubscription == charge.subscription.id)
+                    if (idSubscription == charge.subscription.id)
                     {
                         return Ok(charge.status);
                     }
@@ -160,30 +198,12 @@ namespace condominioApi.Services
 
                 return Ok(_junoCharges.charges);
             }
-            
+
             JunoError _junoError = JsonConvert.DeserializeObject<JunoError>(response.Content);
 
             return modelResponse(_junoError);
         }
 
-        public ActionResult Payment(string cardHash)
-        {
-            dynamic _modelJuno;
 
-            dynamic _getAccessToken = getAccessToken();
-            _modelJuno = _getAccessToken;
-
-            if(!(_modelJuno is JunoError)) {
-                dynamic _tokenizacao = tokenizacao(cardHash, _getAccessToken);
-                _modelJuno = _tokenizacao;
-
-                if(!(_modelJuno is JunoError)) {
-                    dynamic _subscription = subscription(_getAccessToken, _tokenizacao);
-                    _modelJuno = _subscription;
-                }
-            }
-
-            return modelResponse(_modelJuno);
-        }
     }
 }
