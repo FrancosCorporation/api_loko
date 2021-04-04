@@ -53,19 +53,23 @@ namespace condominioApi.Models
         public string descricao { get; set; }
 
     }
-    public class Email
+    public class ConstrucaoEmail
     {
         public string titulo { get; set; }
         public string body { get; set; }
         public string email { get; set; }
 
     }
-    public class RedefinirSenha
+    public class RedefinirSenha : ConfirmacaoEmail
+    {
+        [Required]
+        public string role { get; set; }
+
+    }
+    public class ConfirmacaoEmail
     {
         [Required]
         public string email { get; set; }
-        [Required]
-        public string role { get; set; }
         [Required]
         public string nameCondominio { get; set; }
 

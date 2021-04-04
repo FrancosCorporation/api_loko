@@ -11,6 +11,7 @@ namespace condominioApi.Controllers
     public class CondominioControllerSite : ControllerBase
     {
         private readonly CondominioService _condominioService;
+
         public CondominioControllerSite(CondominioService condominioService)
         {
             _condominioService = condominioService;
@@ -63,18 +64,21 @@ namespace condominioApi.Controllers
         public ActionResult<dynamic> GetAgendamento() => _condominioService.GetAgendamento(Request);
 
         [HttpGet("confirmacaoEmail")]
-        public ActionResult<dynamic> ConfirmacaoEmail([FromQuery] [Required] string token) => _condominioService.ConfirmacaoEmail(token,Request);
+        public ActionResult<dynamic> ConfirmacaoEmail([FromQuery][Required] string token) => _condominioService.ConfirmacaoEmail(token, Request);
+
+        [HttpPost("EmailNaoConfirmado")]
+        public ActionResult<dynamic> EmailNaoConfirmado([FromForm][Required] ConfirmacaoEmail confirm) => _condominioService.EmailNaoConfirmado(confirm, Request);
 
 
         [HttpGet("recuperarSenhaCondominio")]
-        public ActionResult<dynamic> EditarSenha([FromQuery] [Required] string token,[FromQuery] [Required] string senha) => _condominioService.EditarSenha(token, senha,Request);
+        public ActionResult<dynamic> EditarSenha([FromQuery][Required] string token, [FromQuery][Required] string senha) => _condominioService.EditarSenha(token, senha, Request);
 
         [HttpPut("alterarSenha")]
-        public ActionResult<dynamic> AlterarSenha([FromQuery] [Required] string senha) => _condominioService.AlterarSenha(senha,Request);
+        public ActionResult<dynamic> AlterarSenha([FromQuery][Required] string senha) => _condominioService.AlterarSenha(senha, Request);
 
 
         [HttpPost("esqueciMinhaSenha")]
-        public ActionResult<dynamic> RedefinirSenha([FromForm] [Required] RedefinirSenha red) => _condominioService.RedefinirSenha(red,Request);
+        public ActionResult<dynamic> RedefinirSenha([FromForm][Required] RedefinirSenha red) => _condominioService.RedefinirSenha(red, Request);
 
     }
 }

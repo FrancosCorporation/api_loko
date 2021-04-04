@@ -20,6 +20,7 @@ namespace condominioApi
         {
             Configuration = configuration;
             Console.Write("\nDate Up Server :" + DateTime.UtcNow+ "\n"+"\n");
+
         }
         
         public IConfiguration Configuration { get; }
@@ -45,6 +46,7 @@ namespace condominioApi
                 sp.GetRequiredService<IOptions<CondominioDatabaseSetting>>().Value);
 
             services.AddSingleton<CondominioService>();
+            services.AddSingleton<UserService>();
             services.AddSingleton<PaymentService>();
 
 

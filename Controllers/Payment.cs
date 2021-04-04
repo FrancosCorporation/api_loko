@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using condominioApi.Services;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace condominioApi.Controllers
 {
@@ -16,7 +17,8 @@ namespace condominioApi.Controllers
         }
 
         [HttpPost]
-        public ActionResult<dynamic> payment([FromForm] [Required] string cardHash) => _paymentService.Payment(cardHash);
+        [Authorize(Roles = "Administrator")]
+        public ActionResult<dynamic> payment([FromForm] [Required] string cardHash) => _paymentService.Payment(cardHash,Request);
 
         [HttpGet("consult")]
         public ActionResult<dynamic> consultSubscription([FromForm] [Required] string idSubscription) => _paymentService.consultCharges(idSubscription);
