@@ -213,7 +213,7 @@ namespace condominioApi.Services
                             }
                             user.role = "Administrator";
                             user.id = novoAdm["_id"].ToString();
-                            //_userService.EmailConfimacao(user); com erro
+                            _userService.EmailConfimacao(user);
                             return Ok("Condominio " + user.nameCondominio + " cadastrado com sucesso!");
                         }
                         else
