@@ -31,7 +31,6 @@ namespace condominioApi.Services
             return Task.CompletedTask;
         }
 
-
         public void changeIsPayment(IMongoDatabase mongoDatabase, bool isPayment)
         {
             IMongoCollection<UserAdm> userAdmCollection = mongoDatabase.GetCollection<UserAdm>("usersAdm");
@@ -109,19 +108,21 @@ namespace condominioApi.Services
                     {
                         IMongoDatabase mongoDatabase = _clientMongoDb.GetDatabase(databaseName);
                         IMongoCollection<UserAdm> userAdmCollection = mongoDatabase.GetCollection<UserAdm>("usersAdm");
-                        UserAdm userAdm = userAdmCollection.Find<UserAdm>(user => true).ToList()[0];
+                        List<UserAdm> userAdm = userAdmCollection.Find<UserAdm>(user => true).ToList();
 
-                        foreach(JunoCharge charge in _junoCharges.charges)
+                        if(userAdm.Count > 0 && _junoCharges != null)
                         {
-                            if(charge.subscription != null)
+                            foreach(JunoCharge charge in _junoCharges.charges)
                             {
-                                if(userAdm.idSubscription == charge.subscription.id)
+                                if(charge.subscription != null)
                                 {
-                                    insertHistoricoDocument(charge, mongoDatabase);
+                                    if(userAdm[0].idSubscription == charge.subscription.id)
+                                    {
+                                        insertHistoricoDocument(charge, mongoDatabase);
+                                    }
                                 }
                             }
                         }
-
                     }
                 }
             }
