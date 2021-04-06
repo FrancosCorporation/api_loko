@@ -6,8 +6,6 @@ namespace condominioApi.Models
 {
     public class UserAdm : UserGenericLogin
     {
-        
-
         [Required]
         public string numero { get; set; }
         [Required]
@@ -25,10 +23,7 @@ namespace condominioApi.Models
         public bool verificado { get; set; }
         public string creditCardId { get; set; }
         public string idSubscription { get; set; }
-        
         public bool isPayment { get; set; }
-
-
 
     }
     public class UserReferencia

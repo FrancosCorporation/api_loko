@@ -9,21 +9,21 @@ using Newtonsoft.Json.Linq;
 using Atividio.Validadores.Cnpj;
 namespace condominioApi.Services
 {
-
     public class CondominioService : ControllerBase
     {
-        private readonly UserService userService;
+        private readonly IUserService _userService;
         private readonly ObjectsService objectsService = new ObjectsService();
         private readonly CnpjValidador cnpjValidador = new CnpjValidador();
 
         private readonly MongoClient _clientMongoDb;
         private double _timeExpiredTokenLogin = 10;
-        public CondominioService() { }
-        public CondominioService(ICondominioDatabaseSetting setting)
+        
+        public CondominioService() {}
+        public CondominioService(ICondominioDatabaseSetting setting, IUserService userService)
         {
             var client = new MongoClient(setting.ConnectionString);
             _clientMongoDb = client;
-            userService = new UserService(setting);
+            _userService = userService;
             // _condominiosDatabase = client.GetDatabase(setting.DatabaseName);
         }
         public List<string> GetListNameDatabase()
@@ -44,11 +44,11 @@ namespace condominioApi.Services
         }
         public dynamic ListaAgendamentos(HttpRequest request)
         {
-            JObject jsonClaim = userService.UnGenereteToken(request);
+            JObject jsonClaim = _userService.UnGenereteToken(request);
             string nameCondominio = jsonClaim["nameCondominio"].ToString();
-            if (userService.ValidateToken(request))
+            if (_userService.ValidateToken(request))
             {
-                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameCondominio));
+                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(_userService.RemoverCaracterEspecial(nameCondominio));
                 {
 
                     List<string> listNameCollection = new List<string>();
@@ -79,9 +79,9 @@ namespace condominioApi.Services
         {
 
 
-            if (userService.ValidateToken(request))
+            if (_userService.ValidateToken(request))
             {
-                JObject jsonClaim = userService.UnGenereteToken(request);
+                JObject jsonClaim = _userService.UnGenereteToken(request);
                 IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(jsonClaim["database"].ToString());
                 IMongoCollection<UserAdm> _users = _newDatabase.GetCollection<UserAdm>("users");
                 UserAdm _user = _users.Find(_user => _user.id == jsonClaim["objectId"].ToString()).ToList()[0];
@@ -103,7 +103,7 @@ namespace condominioApi.Services
                 UserReferencia userref = _users2.Find(userref => userref.email == user.email).ToList()[0];
 
                 //password para hash
-                string _passwordSHA256 = userService.passwordToHash(user.password);
+                string _passwordSHA256 = _userService.passwordToHash(user.password);
                 _newDatabase = _clientMongoDb.GetDatabase(userref.databaseName);
 
 
@@ -111,16 +111,16 @@ namespace condominioApi.Services
                 {
                     IMongoCollection<UserAdm> _users = _newDatabase.GetCollection<UserAdm>("usersAdm");
                     UserAdm _user = _users.Find(_user => _user.email == user.email & _user.password == _passwordSHA256).ToList()[0];
-                    string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
+                    string _tokenUser = _userService.GenerateToken(_user, _timeExpiredTokenLogin);
                     return Ok(new { token = _tokenUser });
                 }
                 else if (userref.role == "Porteiro")
                 {
-                    if (userService.verificaPagamento(userref.nameCondominio))
+                    if (_userService.verificaPagamento(userref.nameCondominio))
                     {
                         IMongoCollection<UserPorteiro> _users = _newDatabase.GetCollection<UserPorteiro>("usersPorteiros");
                         UserPorteiro _user = _users.Find(_user => _user.email == user.email & _user.password == _passwordSHA256).ToList()[0];
-                        string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
+                        string _tokenUser = _userService.GenerateToken(_user, _timeExpiredTokenLogin);
                         return Ok(new { token = _tokenUser });
                     }
                     else
@@ -143,15 +143,15 @@ namespace condominioApi.Services
             {
                 if (VerificarDatabaseExist(user.nameCondominio))
                 {
-                    if (userService.verificaPagamento(user.nameCondominio))
+                    if (_userService.verificaPagamento(user.nameCondominio))
                     {
                         //password para hash
-                        string _passwordSHA256 = userService.passwordToHash(user.password);
-                        IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio));
+                        string _passwordSHA256 = _userService.passwordToHash(user.password);
+                        IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(_userService.RemoverCaracterEspecial(user.nameCondominio));
 
                         IMongoCollection<UserMorador> _users = _newDatabase.GetCollection<UserMorador>("usersMoradores");
                         UserMorador _user = _users.Find(_user => _user.email == user.email & _user.password == _passwordSHA256).ToList()[0];
-                        string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
+                        string _tokenUser = _userService.GenerateToken(_user, _timeExpiredTokenLogin);
                         return Ok(new { token = _tokenUser });
                     }
                     else
@@ -164,10 +164,6 @@ namespace condominioApi.Services
                     return NotFound(user.nameCondominio + " Não existe.");
                 }
 
-
-
-
-
             }
             catch (SystemException)
             {
@@ -177,10 +173,9 @@ namespace condominioApi.Services
         }
         public dynamic RegisterCondominio(UserAdm user, HttpRequest request)
         {
-
             try
             {
-                if (!userService.EmailExist(user, _clientMongoDb))
+                if (!_userService.EmailExist(user, _clientMongoDb))
                 {
 
                     if (VerificarDatabaseExist(user.nameCondominio))
@@ -189,34 +184,34 @@ namespace condominioApi.Services
                     }
                     else
                     {
-                        if (!cnpjValidador.IsValid(user.cnpj))
+                        if (cnpjValidador.IsValid(user.cnpj))
                         {
                             //criando ou pegando o banco de dados com o nome do condiminio
-                            IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio));
+                            IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(_userService.RemoverCaracterEspecial(user.nameCondominio));
                             //usando o banco para criar as collections
                             _newDatabase.CreateCollection("usersAdm");
                             _newDatabase.CreateCollection("usersPorteiros");
                             _newDatabase.CreateCollection("usersMoradores");
                             _newDatabase.CreateCollection("configApp");
                             _newDatabase.CreateCollection("avisos");
-                            _newDatabase.CreateCollection("historicoPagamnto");
+                            _newDatabase.CreateCollection("historicoPagamento");
 
-                            BsonDocument novoAdm = userService.RetornaUserAdm(user);
+                            BsonDocument novoAdm = _userService.RetornaUserAdm(user);
                             _newDatabase.GetCollection<BsonDocument>("usersAdm").InsertOne(novoAdm);
 
                             _newDatabase = _clientMongoDb.GetDatabase("userscondominio");
                             if (_newDatabase.GetCollection<BsonDocument>("users") == null)
                             {
                                 _newDatabase.CreateCollection("users");
-                                _newDatabase.GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
+                                _newDatabase.GetCollection<BsonDocument>("users").InsertOne(_userService.RetornaUserRef(user));
                             }
                             else
                             {
-                                _newDatabase.GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
+                                _newDatabase.GetCollection<BsonDocument>("users").InsertOne(_userService.RetornaUserRef(user));
                             }
                             user.role = "Administrator";
                             user.id = novoAdm["_id"].ToString();
-                            userService.EmailConfimacao(user);
+                            _userService.EmailConfimacao(user);
                             return Ok("Condominio " + user.nameCondominio + " cadastrado com sucesso!");
                         }
                         else
@@ -245,16 +240,16 @@ namespace condominioApi.Services
         public dynamic RegisterPorteiro(UserPorteiro user, HttpRequest request)
         {
 
-            JObject jsonClaim = userService.UnGenereteToken(request);
+            JObject jsonClaim = _userService.UnGenereteToken(request);
             user.nameCondominio = jsonClaim["nameCondominio"].ToString();
-            if (!userService.EmailExist(user, _clientMongoDb))
+            if (!_userService.EmailExist(user, _clientMongoDb))
             {
-                if (userService.verificaEmailConfirmado(user.nameCondominio))
+                if (_userService.verificaEmailConfirmado(user.nameCondominio))
                 {
-                    if (userService.verificaPagamento(user.nameCondominio))
+                    if (_userService.verificaPagamento(user.nameCondominio))
                     {
-                        _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersPorteiros").InsertOne(userService.RetornaUserPorteiro(user));
-                        _clientMongoDb.GetDatabase("userscondominio").GetCollection<BsonDocument>("users").InsertOne(userService.RetornaUserRef(user));
+                        _clientMongoDb.GetDatabase(_userService.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersPorteiros").InsertOne(_userService.RetornaUserPorteiro(user));
+                        _clientMongoDb.GetDatabase("userscondominio").GetCollection<BsonDocument>("users").InsertOne(_userService.RetornaUserRef(user));
                         return Ok(user.nome + " Cadastrado com sucesso.");
                     }
                     else
@@ -277,15 +272,15 @@ namespace condominioApi.Services
         public dynamic RegisterMorador(UserMorador user, HttpRequest request)
         {
 
-            JObject jsonClaim = userService.UnGenereteToken(request);
+            JObject jsonClaim = _userService.UnGenereteToken(request);
             user.nameCondominio = jsonClaim["nameCondominio"].ToString();
-            if (!userService.EmailExist(user, _clientMongoDb))
+            if (!_userService.EmailExist(user, _clientMongoDb))
             {
-                if (userService.verificaEmailConfirmado(user.nameCondominio))
+                if (_userService.verificaEmailConfirmado(user.nameCondominio))
                 {
-                    if (userService.verificaPagamento(user.nameCondominio))
+                    if (_userService.verificaPagamento(user.nameCondominio))
                     {
-                        _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersMoradores").InsertOne(userService.RetornaUserMorador(user));
+                        _clientMongoDb.GetDatabase(_userService.RemoverCaracterEspecial(user.nameCondominio)).GetCollection<BsonDocument>("usersMoradores").InsertOne(_userService.RetornaUserMorador(user));
                         return Ok("Morador " + user.nome + " Cadastrado com sucesso.");
                     }
                     else
@@ -310,13 +305,13 @@ namespace condominioApi.Services
         {
             try
             {
-                JObject jsonClaim = userService.UnGenereteToken(request);
+                JObject jsonClaim = _userService.UnGenereteToken(request);
                 string nameCondominio = jsonClaim["nameCondominio"].ToString();
-                if (userService.verificaEmailConfirmado(nameCondominio))
+                if (_userService.verificaEmailConfirmado(nameCondominio))
                 {
-                    if (userService.verificaPagamento(nameCondominio))
+                    if (_userService.verificaPagamento(nameCondominio))
                     {
-                        _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameCondominio)).GetCollection<BsonDocument>("avisos").InsertOne(objectsService.RetornaAviso(texto));
+                        _clientMongoDb.GetDatabase(_userService.RemoverCaracterEspecial(nameCondominio)).GetCollection<BsonDocument>("avisos").InsertOne(objectsService.RetornaAviso(texto));
                         return Ok("Aviso " + texto.titulo + " cadastrado com Sucesso");
                     }
                     else
@@ -344,19 +339,19 @@ namespace condominioApi.Services
         {
             try
             {
-                JObject jsonClaim = userService.UnGenereteToken(request);
+                JObject jsonClaim = _userService.UnGenereteToken(request);
                 string nameCondominio = jsonClaim["nameCondominio"].ToString();
                 string nameCollection = "configApp";
-                if (userService.verificaEmailConfirmado(nameCondominio))
+                if (_userService.verificaEmailConfirmado(nameCondominio))
                 {
-                    if (userService.verificaPagamento(nameCondominio))
+                    if (_userService.verificaPagamento(nameCondominio))
                     {
                         if (!verificarAgendamentosExist(nameCondominio, agend.itemNome, nameCollection))
                         {
 
                             IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
                             db.GetCollection<BsonDocument>(nameCollection).InsertOne(objectsService.RetornaAgendamento(agend));
-                            db.CreateCollection(userService.RemoverCaracterEspecialDeixarEspaco(agend.itemNome));
+                            db.CreateCollection(_userService.RemoverCaracterEspecialDeixarEspaco(agend.itemNome));
                             return Ok(agend.itemNome + " para agendamentos cadastrado com Sucesso");
 
                         }
@@ -388,13 +383,13 @@ namespace condominioApi.Services
         {
             try
             {
-                string nameCondominio = userService.UnGenereteToken(request)["nameCondominio"].ToString();
-                if (userService.verificaEmailConfirmado(nameCondominio))
+                string nameCondominio = _userService.UnGenereteToken(request)["nameCondominio"].ToString();
+                if (_userService.verificaEmailConfirmado(nameCondominio))
                 {
-                    if (userService.verificaPagamento(nameCondominio))
+                    if (_userService.verificaPagamento(nameCondominio))
                     {
                         IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                        db.GetCollection<BsonDocument>(userService.RemoverCaracterEspecialDeixarEspaco(name)).InsertOne(objectsService.RetornaCriacaoAgendamento(agend, request));
+                        db.GetCollection<BsonDocument>(_userService.RemoverCaracterEspecialDeixarEspaco(name)).InsertOne(objectsService.RetornaCriacaoAgendamento(agend, request));
                         return Ok("Agendado em " + name + " para " + agend.dateAgendamento + ", Sucesso !");
                     }
                     else
@@ -419,17 +414,17 @@ namespace condominioApi.Services
         {
             try
             {
-                string nameCondominio = userService.UnGenereteToken(request)["nameCondominio"].ToString();
+                string nameCondominio = _userService.UnGenereteToken(request)["nameCondominio"].ToString();
                 string nameCollection = "configApp";
-                if (userService.verificaEmailConfirmado(nameCondominio))
+                if (_userService.verificaEmailConfirmado(nameCondominio))
                 {
-                    if (userService.verificaPagamento(nameCondominio))
+                    if (_userService.verificaPagamento(nameCondominio))
                     {
 
                         if (verificarAgendamentosExist(nameCondominio, agend.itemNome, nameCollection))
                         {
                             IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                            BsonDocument old = GetBson(nameCondominio, agend.itemNome, nameCollection);
+                            BsonDocument old = _userService.GetBson(nameCondominio, agend.itemNome, nameCollection);
                             BsonDocument novo = objectsService.RetornaAgendamento(agend);
                             novo["_id"] = old["_id"];
                             db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
@@ -463,19 +458,19 @@ namespace condominioApi.Services
         {
             request.Headers["Authorization"] = "1 " + token;
             //password para hash
-            string _passwordSHA256 = userService.passwordToHash(senha);
-            string nameCondominio = userService.UnGenereteToken(request)["nameCondominio"].ToString();
-            string role = userService.UnGenereteToken(request)["role"].ToString();
-            string id = userService.UnGenereteToken(request)["objectId"].ToString();
+            string _passwordSHA256 = _userService.passwordToHash(senha);
+            string nameCondominio = _userService.UnGenereteToken(request)["nameCondominio"].ToString();
+            string role = _userService.UnGenereteToken(request)["role"].ToString();
+            string id = _userService.UnGenereteToken(request)["objectId"].ToString();
             //pego o database  
             IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-            if (userService.ValidateToken(request))
+            if (_userService.ValidateToken(request))
             {
                 if (role == "Administrator")
                 {
                     string nameCollection = "usersAdm";
-                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                     novo["password"] = _passwordSHA256;
                     //pego a colection                         faço a alteração
                     db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
@@ -485,8 +480,8 @@ namespace condominioApi.Services
                 else if (role == "Porteiro")
                 {
                     string nameCollection = "usersPorteiros";
-                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                     novo["password"] = _passwordSHA256;
                     //pego a colection                         faço a alteração
                     db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
@@ -495,8 +490,8 @@ namespace condominioApi.Services
                 else if (role == "Morador")
                 {
                     string nameCollection = "usersMoradores";
-                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                     novo["password"] = _passwordSHA256;
                     //pego a colection                         faço a alteração
                     db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
@@ -516,20 +511,20 @@ namespace condominioApi.Services
         public dynamic AlterarSenha(string senha, HttpRequest request)
         {
             //password para hash
-            string _passwordSHA256 = userService.passwordToHash(senha);
-            string nameCondominio = userService.UnGenereteToken(request)["nameCondominio"].ToString();
-            string role = userService.UnGenereteToken(request)["role"].ToString();
-            string id = userService.UnGenereteToken(request)["objectId"].ToString();
+            string _passwordSHA256 = _userService.passwordToHash(senha);
+            string nameCondominio = _userService.UnGenereteToken(request)["nameCondominio"].ToString();
+            string role = _userService.UnGenereteToken(request)["role"].ToString();
+            string id = _userService.UnGenereteToken(request)["objectId"].ToString();
             //pego o database  
             IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-            if (userService.ValidateToken(request))
+            if (_userService.ValidateToken(request))
             {
 
                 if (role == "Administrator")
                 {
                     string nameCollection = "usersAdm";
-                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                     novo["password"] = _passwordSHA256;
                     //pego a colection                         faço a alteração
                     db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
@@ -539,8 +534,8 @@ namespace condominioApi.Services
                 else if (role == "Porteiro")
                 {
                     string nameCollection = "usersPorteiros";
-                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                     novo["password"] = _passwordSHA256;
                     //pego a colection                         faço a alteração
                     db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
@@ -549,8 +544,8 @@ namespace condominioApi.Services
                 else if (role == "Morador")
                 {
                     string nameCollection = "usersMoradores";
-                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                     novo["password"] = _passwordSHA256;
                     //pego a colection                         faço a alteração
                     db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
@@ -569,20 +564,20 @@ namespace condominioApi.Services
         }
         public dynamic ConfirmacaoEmail(String token, HttpRequest request)
         {
-            request.Headers["Authorization"] = "1 " + userService.RemoverBarraToken(token);
+            request.Headers["Authorization"] = "1 " + _userService.RemoverBarraToken(token);
 
-            if (userService.ValidateToken(request))
+            if (_userService.ValidateToken(request))
             {
-                string nameCondominio = userService.UnGenereteToken(request)["nameCondominio"].ToString();
-                string role = userService.UnGenereteToken(request)["role"].ToString();
-                string id = userService.UnGenereteToken(request)["objectId"].ToString();
+                string nameCondominio = _userService.UnGenereteToken(request)["nameCondominio"].ToString();
+                string role = _userService.UnGenereteToken(request)["role"].ToString();
+                string id = _userService.UnGenereteToken(request)["objectId"].ToString();
                 //pego o database  
                 IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
                 if (role == "Administrator")
                 {
                     string nameCollection = "usersAdm";
-                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                     novo["verificado"] = true;
                     //pego a colection                         faço a alteração
                     db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
@@ -592,8 +587,8 @@ namespace condominioApi.Services
                 /*else if (role == "Porteiro")
                 {
                     string nameCollection = "usersPorteiros";
-                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                     novo["password"] = _passwordSHA256;
                     //pego a colection                         faço a alteração
                     db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
@@ -602,8 +597,8 @@ namespace condominioApi.Services
                 else if (role == "Morador")
                 {
                     string nameCollection = "usersMoradores";
-                    BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                    BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                    BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                     novo["password"] = _passwordSHA256;
                     //pego a colection                         faço a alteração
                     db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
@@ -632,7 +627,7 @@ namespace condominioApi.Services
                     string nameCollection = "usersAdm";
                     IMongoCollection<UserAdm> _users = db.GetCollection<UserAdm>(nameCollection);
                     UserAdm _user = _users.Find(_user => _user.email == confirm.email).ToList()[0];
-                    userService.EmailConfimacao(_user);
+                    _userService.EmailConfimacao(_user);
                     return Ok("Enviamos novamente um Email de confirmação, (Valido por 30 minutos)");
                 }
                 catch
@@ -659,8 +654,8 @@ namespace condominioApi.Services
                         string nameCollection = "usersAdm";
                         IMongoCollection<UserAdm> _users = db.GetCollection<UserAdm>(nameCollection);
                         UserAdm _user = _users.Find(_user => _user.email == red.email).ToList()[0];
-                        string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
-                        userService.EmailDeRedefinicaoDeSenha(_user);
+                        string _tokenUser = _userService.GenerateToken(_user, _timeExpiredTokenLogin);
+                        _userService.EmailDeRedefinicaoDeSenha(_user);
                         return Ok("Verique seu email (Valido por 30 minutos)");
                     }
                     catch
@@ -675,8 +670,8 @@ namespace condominioApi.Services
                         string nameCollection = "usersPorteiros";
                         IMongoCollection<UserAdm> _users = db.GetCollection<UserAdm>(nameCollection);
                         UserAdm _user = _users.Find(_user => _user.email == red.email).ToList()[0];
-                        string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
-                        userService.EmailDeRedefinicaoDeSenha(_user);
+                        string _tokenUser = _userService.GenerateToken(_user, _timeExpiredTokenLogin);
+                        _userService.EmailDeRedefinicaoDeSenha(_user);
                         return Ok("Verique seu email (Valido por 30 minutos)");
                     }
                     catch
@@ -691,8 +686,8 @@ namespace condominioApi.Services
                         string nameCollection = "usersMoradores";
                         IMongoCollection<UserAdm> _users = db.GetCollection<UserAdm>(nameCollection);
                         UserAdm _user = _users.Find(_user => _user.email == red.email).ToList()[0];
-                        string _tokenUser = userService.GenerateToken(_user, _timeExpiredTokenLogin);
-                        userService.EmailDeRedefinicaoDeSenha(_user);
+                        string _tokenUser = _userService.GenerateToken(_user, _timeExpiredTokenLogin);
+                        _userService.EmailDeRedefinicaoDeSenha(_user);
                         return Ok("Verique seu email (Valido por 30 minutos)");
                     }
                     catch
@@ -716,12 +711,12 @@ namespace condominioApi.Services
             try
             {
 
-                if (userService.ValidateToken(request) & userService.UnGenereteToken(request)["role"].ToString() != "Morador")
+                if (_userService.ValidateToken(request) & _userService.UnGenereteToken(request)["role"].ToString() != "Morador")
                 {
-                    string nameCondominio = userService.RemoverCaracterEspecial(userService.UnGenereteToken(request)["nameCondominio"].ToString());
-                    if (userService.verificaEmailConfirmado(nameCondominio))
+                    string nameCondominio = _userService.RemoverCaracterEspecial(_userService.UnGenereteToken(request)["nameCondominio"].ToString());
+                    if (_userService.verificaEmailConfirmado(nameCondominio))
                     {
-                        if (userService.verificaPagamento(nameCondominio))
+                        if (_userService.verificaPagamento(nameCondominio))
                         {
 
                             List<CriacaoAgendamento> list = new List<CriacaoAgendamento>();
@@ -757,21 +752,21 @@ namespace condominioApi.Services
             try
             {
 
-                if (userService.ValidateToken(request))
+                if (_userService.ValidateToken(request))
                 {
-                    string role = userService.UnGenereteToken(request)["role"].ToString();
-                    string id = userService.UnGenereteToken(request)["_id"].ToString();
-                    string nameCondominio = userService.RemoverCaracterEspecial(userService.UnGenereteToken(request)["nameCondominio"].ToString());
-                     if (userService.verificaEmailConfirmado(nameCondominio))
+                    string role = _userService.UnGenereteToken(request)["role"].ToString();
+                    string id = _userService.UnGenereteToken(request)["_id"].ToString();
+                    string nameCondominio = _userService.RemoverCaracterEspecial(_userService.UnGenereteToken(request)["nameCondominio"].ToString());
+                     if (_userService.verificaEmailConfirmado(nameCondominio))
                     {
-                        if (userService.verificaPagamento(nameCondominio))
+                        if (_userService.verificaPagamento(nameCondominio))
                         {
                             if (role == "Administrator")
                             {
                                 string nameCollection = "usersAdm";
                                 IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                                BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                                BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                                BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                                BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                                 novo["image"] = foto;
                                 db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
                                 return Ok("Foto alterada com Sucesso !");
@@ -781,8 +776,8 @@ namespace condominioApi.Services
 
                                 string nameCollection = "usersPorteiros";
                                 IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                                BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                                BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                                BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                                BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                                 novo["image"] = foto;
                                 db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
                                 return Ok("Foto alterada com Sucesso !");
@@ -791,8 +786,8 @@ namespace condominioApi.Services
                             {
                                 string nameCollection = "usersMoradores";
                                 IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
-                                BsonDocument old = GetBson(nameCondominio, id, nameCollection);
-                                BsonDocument novo = GetBson(nameCondominio, id, nameCollection);
+                                BsonDocument old = _userService.GetBson(nameCondominio, id, nameCollection);
+                                BsonDocument novo = _userService.GetBson(nameCondominio, id, nameCollection);
                                 novo["image"] = foto;
                                 db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, novo);
                                 return Ok("Foto alterada com Sucesso !");
@@ -822,7 +817,7 @@ namespace condominioApi.Services
         {
             try
             {
-                if (_clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameDatabase)).ListCollections().ToList().Count > 0)
+                if (_clientMongoDb.GetDatabase(_userService.RemoverCaracterEspecial(nameDatabase)).ListCollections().ToList().Count > 0)
                 {
                     return true;
                 }
@@ -838,7 +833,7 @@ namespace condominioApi.Services
         {
             try
             {
-                if (GetBson(nameDatabase, nameitem, nameCollection) != null)
+                if (_userService.GetBson(nameDatabase, nameitem, nameCollection) != null)
                 {
                     return true;
                 }
@@ -850,81 +845,12 @@ namespace condominioApi.Services
                 return false;
             }
         }
-        public BsonDocument GetBson(String nameDatabase, String nameitem, String nameCollection)
-        {
-            try
-            {
-                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameDatabase));
-
-                if (nameCollection == "configApp")
-                {
-                    IMongoCollection<Agendamento> agend = _newDatabase.GetCollection<Agendamento>(nameCollection);
-                    Agendamento agendam = agend.Find(agendam => agendam.itemNome == userService.RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
-
-                    if (agendam != null)
-                    {
-                        return agendam.ToBsonDocument();
-                    }
-                }
-                else if (nameCollection == "usersAdm")
-                {
-                    IMongoCollection<UserAdm> user = _newDatabase.GetCollection<UserAdm>(nameCollection);
-                    UserAdm user1 = user.Find(user1 => user1.id == userService.RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
-
-                    if (user1 != null)
-                    {
-                        return user1.ToBsonDocument();
-                    }
-
-                }
-                else if (nameCollection == "usersPorteiros")
-                {
-                    IMongoCollection<UserPorteiro> user = _newDatabase.GetCollection<UserPorteiro>(nameCollection);
-                    UserPorteiro user1 = user.Find(user1 => user1.id == userService.RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
-
-                    if (user1 != null)
-                    {
-                        return user1.ToBsonDocument();
-                    }
-
-                }
-                else if (nameCollection == "usersMoradores")
-                {
-                    IMongoCollection<UserMorador> user = _newDatabase.GetCollection<UserMorador>(nameCollection);
-                    UserMorador user1 = user.Find(user1 => user1.id == userService.RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
-
-                    if (user1 != null)
-                    {
-                        return user1.ToBsonDocument();
-                    }
-
-                }
-                else if (nameCollection == "avisos")
-                {
-                    IMongoCollection<Aviso> user = _newDatabase.GetCollection<Aviso>(nameCollection);
-                    Aviso aviso = user.Find(aviso => aviso.titulo == userService.RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
-
-                    if (aviso != null)
-                    {
-                        return aviso.ToBsonDocument();
-                    }
-
-                }
-
-
-                return null;
-            }
-            catch
-            {
-                return null;
-            }
-        }
         public dynamic GetAgendamento(HttpRequest request)
         {
-            string role = userService.UnGenereteToken(request)["role"].ToString();
-            if ((role == "Administrator" || role == "Porteiro" || role == "Morador") & userService.ValidateToken(request))
+            string role = _userService.UnGenereteToken(request)["role"].ToString();
+            if ((role == "Administrator" || role == "Porteiro" || role == "Morador") & _userService.ValidateToken(request))
             {
-                string nameCondominio = userService.UnGenereteToken(request)["nameCondominio"].ToString();
+                string nameCondominio = _userService.UnGenereteToken(request)["nameCondominio"].ToString();
                 List<Aviso> list = new List<Aviso>();
                 IMongoDatabase db = _clientMongoDb.GetDatabase(nameCondominio);
                 return db.GetCollection<Aviso>("avisos").Find(_ => true).ToList();
@@ -937,13 +863,13 @@ namespace condominioApi.Services
         public dynamic GetConfigAgendamentos(ObjectBase obj, HttpRequest request)
         {
 
-            string role = userService.UnGenereteToken(request)["role"].ToString();
-            if ((role == "Administrator" || role == "Porteiro" || role == "Morador") & userService.ValidateToken(request))
+            string role = _userService.UnGenereteToken(request)["role"].ToString();
+            if ((role == "Administrator" || role == "Porteiro" || role == "Morador") & _userService.ValidateToken(request))
             {
-                string nameCondominio = userService.UnGenereteToken(request)["nameCondominio"].ToString();
-                IMongoDatabase db = _clientMongoDb.GetDatabase(userService.RemoverCaracterEspecial(nameCondominio));
+                string nameCondominio = _userService.UnGenereteToken(request)["nameCondominio"].ToString();
+                IMongoDatabase db = _clientMongoDb.GetDatabase(_userService.RemoverCaracterEspecial(nameCondominio));
                 IMongoCollection<Agendamento> config = db.GetCollection<Agendamento>("configApp");
-                Agendamento agend = config.Find(agend => agend.itemNome == userService.RemoverCaracterEspecialDeixarEspaco(obj.itemNome)).ToList()[0];
+                Agendamento agend = config.Find(agend => agend.itemNome == _userService.RemoverCaracterEspecialDeixarEspaco(obj.itemNome)).ToList()[0];
                 agend.id = "";
                 return agend;
             }

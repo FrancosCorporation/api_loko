@@ -9,13 +9,34 @@ using Microsoft.AspNetCore.Http;
 
 namespace condominioApi.Services
 {
-    public class PaymentService : ControllerBase
+    public interface IPaymentService
+    {        
+        bool isTokenExpiration();
+
+        ActionResult Payment(string cardHash, HttpRequest request);
+
+        dynamic getAccessToken();
+
+        dynamic tokenizacao(string cardHash, JunoAccessToken junoAccessToken);
+
+        dynamic subscription(HttpRequest requestUser, JunoAccessToken junoAccessToken, JunoTokenizacao junoTokenizacao);
+
+        ActionResult modelResponse(dynamic modelJuno);
+        ActionResult consultCharges();
+    }
+
+    public class PaymentService : ControllerBase, IPaymentService
     {
         //Access token
         //Gerar id card
         //Verificar plano
         //Assinar plano
-        UserService userService = new UserService();
+        private readonly IUserService _userSevice;
+
+        public PaymentService(IUserService userService)
+        {
+            _userSevice = userService;
+        }
 
         private JunoAccessToken _validateAccessToken = new JunoAccessToken() { dateTimeGenerateAccessToken = new DateTime(1970) };
 
@@ -50,7 +71,6 @@ namespace condominioApi.Services
 
             return modelResponse(_modelJuno);
         }
-
 
         public dynamic getAccessToken()
         {
@@ -101,7 +121,7 @@ namespace condominioApi.Services
 
         public dynamic subscription(HttpRequest requestUser, JunoAccessToken junoAccessToken, JunoTokenizacao junoTokenizacao)
         {
-            UserAdm user = userService.RetornaUserAdmPorId(userService.UnGenereteToken(requestUser)["nameCondominio"].ToString(), userService.UnGenereteToken(requestUser)["objectId"].ToString());
+            UserAdm user = _userSevice.RetornaUserAdmPorId(_userSevice.UnGenereteToken(requestUser)["nameCondominio"].ToString(), _userSevice.UnGenereteToken(requestUser)["objectId"].ToString());
             user.creditCardId = junoTokenizacao.creditCardId;
             var client = new RestClient($"{_baseUrl}/api-integration/subscriptions");
             var request = new RestRequest(Method.POST);
@@ -142,7 +162,7 @@ namespace condominioApi.Services
             {
                 JunoSubscription _junoSubscription = JsonConvert.DeserializeObject<JunoSubscription>(response.Content);
                 user.idSubscription = _junoSubscription.id;
-                userService.GravaUserAdm(user);
+                _userSevice.GravaUserAdm(user);
                 return _junoSubscription;
             }
             JunoError _junoError = JsonConvert.DeserializeObject<JunoError>(response.Content);
@@ -167,10 +187,9 @@ namespace condominioApi.Services
             }
         }
 
-        public dynamic consultCharges(string idSubscription)
+        public ActionResult consultCharges()
         {
             dynamic _getAccessToken = getAccessToken();
-            if (_getAccessToken is JunoError) return _getAccessToken;
 
             var client = new RestClient($"{_baseUrl}/api-integration/charges");
             var request = new RestRequest(Method.GET);
@@ -183,27 +202,12 @@ namespace condominioApi.Services
 
             IRestResponse response = client.Execute(request);
 
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                JunoEmbedded _junoEmbedded = JsonConvert.DeserializeObject<JunoEmbedded>(response.Content);
-                JunoCharges _junoCharges = _junoEmbedded._embedded;
+            JunoEmbedded _junoEmbedded = JsonConvert.DeserializeObject<JunoEmbedded>(response.Content);
+            JunoCharges _junoCharges = _junoEmbedded._embedded;
 
-                foreach (var charge in _junoCharges.charges)
-                {
-                    if (idSubscription == charge.subscription.id)
-                    {
-                        return Ok(charge.status);
-                    }
-                }
+            return Ok(_junoCharges);
 
-                return Ok(_junoCharges.charges);
-            }
-
-            JunoError _junoError = JsonConvert.DeserializeObject<JunoError>(response.Content);
-
-            return modelResponse(_junoError);
         }
-
 
     }
 }

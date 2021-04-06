@@ -15,26 +15,44 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-
-
 namespace condominioApi.Services
 {
-
-    public class UserService : ControllerBase
+    public interface IUserService
     {
+        BsonDocument RetornaUserAdm(UserAdm user);
+        BsonDocument RetornaUserRef(UserGenericLogin user);
+        BsonDocument RetornaUserPorteiro(UserPorteiro user);
+        BsonDocument RetornaUserMorador(UserMorador user);
+        Boolean EmailExist(UserGenericLogin user, IMongoClient database);
+        string passwordToHash(string password);
+        string GenerateToken(UserGenericLogin user, double horas);
+        Boolean ValidateToken(HttpRequest request);
+        JObject UnGenereteToken(HttpRequest request);
+        string RemoverCaracterEspecial(string str);
+        string RemoverCaracterEspecialDeixarEspaco(string str);
+        string RemoverBarraToken(string str);
+        void SendEmail(ConstrucaoEmail email);
+        void EmailConfimacao(UserGenericLogin user);
+        void EmailDeRedefinicaoDeSenha(UserGenericLogin user);
+        UserAdm RetornaUserAdmPorId(string nameCondominio, string id);
+        BsonDocument GetBson(String nameDatabase, String nameitem, String nameCollection);
+        void GravaUserAdm(UserAdm user);
+        bool verificaEmailConfirmado(string nameCondominio);
+        bool verificaPagamento(string nameCondominio);
+    }
 
+    public class UserService : ControllerBase, IUserService
+    {
         private readonly MongoClient _clientMongoDb;
-
         private string URL = "https://localhost:5001/";
         private double _timeExpiredTokenEMAIL = 0.5;
-        public UserService()
-        {
-        }
+
         public UserService(ICondominioDatabaseSetting setting)
         {
             var client = new MongoClient(setting.ConnectionString);
             _clientMongoDb = client;
         }
+
         public BsonDocument RetornaUserAdm(UserAdm user)
         {
             if (user.image == null)
@@ -60,7 +78,6 @@ namespace condominioApi.Services
                     {"isPayment" , false},
                     {"creditCardId" , ""},
                     {"idSubscription" , ""}
-
                 };
         }
         public BsonDocument RetornaUserRef(UserGenericLogin user)
@@ -359,15 +376,82 @@ namespace condominioApi.Services
             IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(RemoverCaracterEspecial(nameCondominio));
             IMongoCollection<UserAdm> _users = _newDatabase.GetCollection<UserAdm>("usersAdm");
             return _users.Find(_user => _user.id == id).ToList()[0];
+        }
+        public BsonDocument GetBson(String nameDatabase, String nameitem, String nameCollection)
+        {
+            try
+            {
+                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(RemoverCaracterEspecial(nameDatabase));
 
+                if (nameCollection == "configApp")
+                {
+                    IMongoCollection<Agendamento> agend = _newDatabase.GetCollection<Agendamento>(nameCollection);
+                    Agendamento agendam = agend.Find(agendam => agendam.itemNome == RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
+
+                    if (agendam != null)
+                    {
+                        return agendam.ToBsonDocument();
+                    }
+                }
+                else if (nameCollection == "usersAdm")
+                {
+                    IMongoCollection<UserAdm> user = _newDatabase.GetCollection<UserAdm>(nameCollection);
+                    UserAdm user1 = user.Find(user1 => user1.id == RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
+
+                    if (user1 != null)
+                    {
+                        return user1.ToBsonDocument();
+                    }
+
+                }
+                else if (nameCollection == "usersPorteiros")
+                {
+                    IMongoCollection<UserPorteiro> user = _newDatabase.GetCollection<UserPorteiro>(nameCollection);
+                    UserPorteiro user1 = user.Find(user1 => user1.id == RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
+
+                    if (user1 != null)
+                    {
+                        return user1.ToBsonDocument();
+                    }
+
+                }
+                else if (nameCollection == "usersMoradores")
+                {
+                    IMongoCollection<UserMorador> user = _newDatabase.GetCollection<UserMorador>(nameCollection);
+                    UserMorador user1 = user.Find(user1 => user1.id == RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
+
+                    if (user1 != null)
+                    {
+                        return user1.ToBsonDocument();
+                    }
+
+                }
+                else if (nameCollection == "avisos")
+                {
+                    IMongoCollection<Aviso> user = _newDatabase.GetCollection<Aviso>(nameCollection);
+                    Aviso aviso = user.Find(aviso => aviso.titulo == RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
+
+                    if (aviso != null)
+                    {
+                        return aviso.ToBsonDocument();
+                    }
+
+                }
+
+
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
         }
         public void GravaUserAdm(UserAdm user)
         {
             try
             {
-                CondominioService cond = new CondominioService();
                 string nameCollection = "usersAdm";
-                BsonDocument old = cond.GetBson(user.nameCondominio, user.id, nameCollection);
+                BsonDocument old = GetBson(user.nameCondominio, user.id, nameCollection);
                 IMongoDatabase db = _clientMongoDb.GetDatabase(RemoverCaracterEspecial(user.nameCondominio));
                 db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, user.ToBsonDocument());
             }
@@ -375,7 +459,6 @@ namespace condominioApi.Services
             {
                 Console.Write(e);
             }
-
 
         }
         public bool verificaEmailConfirmado(string nameCondominio)
@@ -424,9 +507,6 @@ namespace condominioApi.Services
 
 
         }
-
-
-
 
     }
 }

@@ -9,7 +9,13 @@ namespace condominioApi.Services
 {
     public class ObjectsService
     {
-        private readonly UserService userService = new UserService();
+        private readonly IUserService _userSevice;
+
+        public ObjectsService() {}
+        public ObjectsService(IUserService userService)
+        {
+            _userSevice = userService;
+        }
         public BsonDocument RetornaAviso(Aviso texto)
         {
 
@@ -42,7 +48,7 @@ namespace condominioApi.Services
         {
             return new BsonDocument{
                     {"_id", ObjectId.GenerateNewId()},
-                    {"idUser", userService.UnGenereteToken(request)["objectId"].ToString()},
+                    {"idUser", _userSevice.UnGenereteToken(request)["objectId"].ToString()},
                     {"dateAgendamento", agend.dateAgendamento},
                     {"datacreate", DateTimeOffset.Now.ToUnixTimeSeconds()}
                 };

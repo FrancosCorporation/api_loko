@@ -9,9 +9,9 @@ namespace condominioApi.Controllers
     [ApiController]
     public class PaymentController : ControllerBase
     {
-        private readonly PaymentService _paymentService;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentController(PaymentService paymentService)
+        public PaymentController(IPaymentService paymentService)
         {
             _paymentService = paymentService;
         }
@@ -20,8 +20,8 @@ namespace condominioApi.Controllers
         [Authorize(Roles = "Administrator")]
         public ActionResult<dynamic> payment([FromForm] [Required] string cardHash) => _paymentService.Payment(cardHash,Request);
 
-        [HttpGet("consult")]
-        public ActionResult<dynamic> consultSubscription([FromForm] [Required] string idSubscription) => _paymentService.consultCharges(idSubscription);
+        [HttpGet("Consult")]
+        public ActionResult<dynamic> consult() => _paymentService.consultCharges();
 
     }
 }
