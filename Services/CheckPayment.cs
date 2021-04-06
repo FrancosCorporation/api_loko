@@ -31,14 +31,24 @@ namespace condominioApi.Services
             return Task.CompletedTask;
         }
 
+
+        public void changeIsPayment(IMongoDatabase mongoDatabase, bool isPayment)
+        {
+            IMongoCollection<UserAdm> userAdmCollection = mongoDatabase.GetCollection<UserAdm>("usersAdm");
+            UserAdm userAdm = userAdmCollection.Find<UserAdm>(userAdm => true).ToList()[0];
+
+            var update = Builders<UserAdm>.Update.Set("isPayment", isPayment);
+            var result = userAdmCollection.UpdateOne(userAdm => true, update);
+        }
         public void insertHistoricoDocument(JunoCharge charge, IMongoDatabase mongoDatabase)
         {
             IMongoCollection<JunoHistorico> historicoCollection = mongoDatabase.GetCollection<JunoHistorico>("historicoPagamento");
             DateTimeOffset dueDateCharge = new DateTimeOffset(new DateTime(int.Parse(charge.dueDate.Split("-")[0]), int.Parse(charge.dueDate.Split("-")[1]), int.Parse(charge.dueDate.Split("-")[2])));
+            List<JunoHistorico> historicoDocument = historicoCollection.Find<JunoHistorico>(JunoHistorico => true).ToList();
 
-            try
+            if(historicoDocument.Count > 0)
             {
-                if(dueDateCharge.ToUnixTimeSeconds() > historicoCollection.Find<JunoHistorico>(JunoHistorico => true).ToList()[0].dueData)
+                if(dueDateCharge.ToUnixTimeSeconds() > historicoDocument[0].dueData)
                 {
                     if(charge.status == "PAID")
                     {
@@ -50,25 +60,25 @@ namespace condominioApi.Services
                         };
                         historicoCollection.InsertOne(doc);
 
-                        IMongoCollection<UserAdm> userAdmCollection = mongoDatabase.GetCollection<UserAdm>("usersAdm");
-                        UserAdm userAdm = userAdmCollection.Find<UserAdm>(userAdm => true).ToList()[0];
-                        UserAdm newUserAdm = userAdm;
-                        newUserAdm.isPayment = true;
-                        userAdmCollection.ReplaceOne(userAdm.ToBsonDocument(), newUserAdm);
-
+                        changeIsPayment(mongoDatabase, true);
+                    } else {
+                        changeIsPayment(mongoDatabase, false);
                     }
-                    
-                } 
-            }
-            catch (System.ArgumentOutOfRangeException)
-            {
-                JunoHistorico doc =  new JunoHistorico() {
+                }
+            } else {
+                if(charge.status == "PAID")
+                {
+                    JunoHistorico doc =  new JunoHistorico() {
                     idCharge = charge.subscription.id,
                     amount = charge.amount,
                     dueData = dueDateCharge.ToUnixTimeSeconds(),
                     status = charge.status,
-                };
-                historicoCollection.InsertOne(doc);
+                    };
+                    historicoCollection.InsertOne(doc);
+                    changeIsPayment(mongoDatabase, true);
+                } else {
+                    changeIsPayment(mongoDatabase, false);
+                }
             }
         }
 
@@ -103,16 +113,12 @@ namespace condominioApi.Services
 
                         foreach(JunoCharge charge in _junoCharges.charges)
                         {
-                            try
+                            if(charge.subscription != null)
                             {
                                 if(userAdm.idSubscription == charge.subscription.id)
                                 {
                                     insertHistoricoDocument(charge, mongoDatabase);
                                 }
-                            }
-                            catch (System.NullReferenceException)
-                            {
-                                continue;
                             }
                         }
 
