@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using condominioApi.Services;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
+using condominioApi.DependencyService;
 
 namespace condominioApi.Controllers
 {
