@@ -8,9 +8,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System;
 using Microsoft.Extensions.Options;
-using System.Threading;
 using condominioApi.Services;
 using condominioApi.Models;
+using condominioApi.DependencyService;
 
 namespace condominioApi
 {
@@ -44,9 +44,10 @@ namespace condominioApi
             services.AddSingleton<ICondominioDatabaseSetting>(sp =>
                 sp.GetRequiredService<IOptions<CondominioDatabaseSetting>>().Value);
 
+            services.AddSingleton<IUserService, UserService>();
             services.AddSingleton<CondominioService>();
-            services.AddSingleton<PaymentService>();
-
+            services.AddSingleton<IPaymentService, PaymentService>();
+            services.AddHostedService<CheckPayment>();
 
             services.AddControllers();
 

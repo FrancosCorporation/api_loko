@@ -13,16 +13,23 @@ using System.Security.Cryptography;
 using MongoDB.Bson;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
-/*
-    Gera token utilizando a chave Secret no arquivo Settings
-*/
+using Microsoft.AspNetCore.Mvc;
+using condominioApi.DependencyService;
+
 namespace condominioApi.Services
 {
-
-    public class UserService
+    public class UserService : ControllerBase, IUserService
     {
+        private readonly MongoClient _clientMongoDb;
         private string URL = "https://localhost:5001/";
         private double _timeExpiredTokenEMAIL = 0.5;
+
+        public UserService(ICondominioDatabaseSetting setting)
+        {
+            var client = new MongoClient(setting.ConnectionString);
+            _clientMongoDb = client;
+        }
+
         public BsonDocument RetornaUserAdm(UserAdm user)
         {
             if (user.image == null)
@@ -33,14 +40,21 @@ namespace condominioApi.Services
                     {"_id", ObjectId.GenerateNewId()},
                     {"email", user.email.ToLower()},
                     {"password", passwordToHash(password: user.password)},
+                    {"role", "Administrator"},
+                    {"image", user.image},
+                    {"datacreate", DateTimeOffset.Now.ToUnixTimeSeconds()},
+                    {"nameCondominio", user.nameCondominio},
+                    {"numero", user.numero},
                     {"estado", user.estado},
                     {"cidade", user.cidade},
-                    {"endereco", user.endereco},
-                    {"nameCondominio", user.nameCondominio},
-                    {"image", user.image},
+                    {"rua", user.rua},
+                    {"nome", user.nome},
+                    {"cnpj", user.cnpj},
+                    {"cep", user.cep},
                     {"verificado" , false},
-                    {"role", "Administrator"},
-                    {"datacreate", DateTimeOffset.Now.ToUnixTimeSeconds()}
+                    {"isPayment" , false},
+                    {"creditCardId" , ""},
+                    {"idSubscription" , ""}
                 };
         }
         public BsonDocument RetornaUserRef(UserGenericLogin user)
@@ -268,7 +282,7 @@ namespace condominioApi.Services
         }
         public string RemoverBarraToken(string str)
         {
-            return str.Replace("/","");
+            return str.Replace("/", "");
         }
         public string BloquarUser(HttpRequest request)
         {
@@ -277,7 +291,7 @@ namespace condominioApi.Services
 
             return "";
         }
-        public void SendEmail(Email email)
+        public void SendEmail(ConstrucaoEmail email)
         {
             SmtpClient client = new SmtpClient("smtp.gmail.com", 587);
             client.Credentials = new NetworkCredential("seunegocioonlineagr@gmail.com", "35141543Rd");
@@ -305,9 +319,9 @@ namespace condominioApi.Services
         public void EmailConfimacao(UserGenericLogin user)
         {
             string url = URL + "api/confirmacaoEmail";
-            Email email = new Email();
+            ConstrucaoEmail email = new ConstrucaoEmail();
             email.email = user.email;
-            email.titulo = "Redefinição de Senha";
+            email.titulo = "Confirmação de Email";
             string image = "https://tse2.mm.bing.net/th?id=OIP.h3Eqt3wBHuM0tMbslVUcdwHaEo&pid=Api&P=0&w=300&h=300";
             string htmlimage = "<img src=" + image + " />";
             string html = string.Empty;
@@ -321,7 +335,7 @@ namespace condominioApi.Services
         public void EmailDeRedefinicaoDeSenha(UserGenericLogin user)
         {
             string url = URL + "api/editarsenha";
-            Email email = new Email();
+            ConstrucaoEmail email = new ConstrucaoEmail();
             email.email = user.email;
             email.titulo = "Redefinição de Senha";
             string image = "https://tse2.mm.bing.net/th?id=OIP.h3Eqt3wBHuM0tMbslVUcdwHaEo&pid=Api&P=0&w=300&h=300";
@@ -334,8 +348,142 @@ namespace condominioApi.Services
             SendEmail(email);
 
         }
+        public UserAdm RetornaUserAdmPorId(string nameCondominio, string id)
+        {
+            IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(RemoverCaracterEspecial(nameCondominio));
+            IMongoCollection<UserAdm> _users = _newDatabase.GetCollection<UserAdm>("usersAdm");
+            return _users.Find(_user => _user.id == id).ToList()[0];
+        }
+        public BsonDocument GetBson(String nameDatabase, String nameitem, String nameCollection)
+        {
+            try
+            {
+                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(RemoverCaracterEspecial(nameDatabase));
+
+                if (nameCollection == "configApp")
+                {
+                    IMongoCollection<Agendamento> agend = _newDatabase.GetCollection<Agendamento>(nameCollection);
+                    Agendamento agendam = agend.Find(agendam => agendam.itemNome == RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
+
+                    if (agendam != null)
+                    {
+                        return agendam.ToBsonDocument();
+                    }
+                }
+                else if (nameCollection == "usersAdm")
+                {
+                    IMongoCollection<UserAdm> user = _newDatabase.GetCollection<UserAdm>(nameCollection);
+                    UserAdm user1 = user.Find(user1 => user1.id == RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
+
+                    if (user1 != null)
+                    {
+                        return user1.ToBsonDocument();
+                    }
+
+                }
+                else if (nameCollection == "usersPorteiros")
+                {
+                    IMongoCollection<UserPorteiro> user = _newDatabase.GetCollection<UserPorteiro>(nameCollection);
+                    UserPorteiro user1 = user.Find(user1 => user1.id == RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
+
+                    if (user1 != null)
+                    {
+                        return user1.ToBsonDocument();
+                    }
+
+                }
+                else if (nameCollection == "usersMoradores")
+                {
+                    IMongoCollection<UserMorador> user = _newDatabase.GetCollection<UserMorador>(nameCollection);
+                    UserMorador user1 = user.Find(user1 => user1.id == RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
+
+                    if (user1 != null)
+                    {
+                        return user1.ToBsonDocument();
+                    }
+
+                }
+                else if (nameCollection == "avisos")
+                {
+                    IMongoCollection<Aviso> user = _newDatabase.GetCollection<Aviso>(nameCollection);
+                    Aviso aviso = user.Find(aviso => aviso.titulo == RemoverCaracterEspecialDeixarEspaco(nameitem)).ToList()[0];
+
+                    if (aviso != null)
+                    {
+                        return aviso.ToBsonDocument();
+                    }
+
+                }
 
 
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+        public void GravaUserAdm(UserAdm user)
+        {
+            try
+            {
+                string nameCollection = "usersAdm";
+                BsonDocument old = GetBson(user.nameCondominio, user.id, nameCollection);
+                IMongoDatabase db = _clientMongoDb.GetDatabase(RemoverCaracterEspecial(user.nameCondominio));
+                db.GetCollection<BsonDocument>(nameCollection).ReplaceOne(old, user.ToBsonDocument());
+            }
+            catch (System.Exception e)
+            {
+                Console.Write(e);
+            }
+
+        }
+        public bool verificaEmailConfirmado(string nameCondominio)
+        {
+            try
+            {
+                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(RemoverCaracterEspecial(nameCondominio));
+                UserAdm adm = _newDatabase.GetCollection<UserAdm>("usersAdm").Find(_user => true).ToList()[0];
+                if (adm.verificado)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (System.Exception e)
+            {
+                Console.Write(e);
+                return false;
+            }
+
+
+        }
+        public bool verificaPagamento(string nameCondominio)
+        {
+            try
+            {
+                IMongoDatabase _newDatabase = _clientMongoDb.GetDatabase(RemoverCaracterEspecial(nameCondominio));
+                UserAdm adm = _newDatabase.GetCollection<UserAdm>("usersAdm").Find(_user => true).ToList()[0];
+                if (adm.isPayment)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch (System.Exception e)
+            {
+                Console.Write(e);
+                return false;
+            }
+
+
+        }
 
     }
 }
