@@ -21,7 +21,6 @@ namespace condominioApi.Controllers
         [HttpPost("cadastroCondominio")]
         public ActionResult<dynamic> RegisterCondominio([FromForm] UserAdm user) =>
            _condominioService.RegisterCondominio(user, Request);
-
         // o user adm vai logar por aqui
         [HttpPost("loginCondominio")]
         public ActionResult<dynamic> LoginCondominio([FromForm] UserGeneric user) => _condominioService.LoginCondominio(user, Request);
