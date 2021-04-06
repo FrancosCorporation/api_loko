@@ -2,6 +2,7 @@ using System;
 using condominioApi.Models;
 using MongoDB.Bson;
 using Microsoft.AspNetCore.Http;
+using condominioApi.DependencyService;
 /*
     Gera token utilizando a chave Secret no arquivo Settings
 */

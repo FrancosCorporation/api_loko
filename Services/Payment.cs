@@ -6,25 +6,10 @@ using condominioApi.Models;
 using System.Net;
 using System;
 using Microsoft.AspNetCore.Http;
+using condominioApi.DependencyService;
 
 namespace condominioApi.Services
 {
-    public interface IPaymentService
-    {        
-        bool isTokenExpiration();
-
-        ActionResult Payment(string cardHash, HttpRequest request);
-
-        dynamic getAccessToken();
-
-        dynamic tokenizacao(string cardHash, JunoAccessToken junoAccessToken);
-
-        dynamic subscription(HttpRequest requestUser, JunoAccessToken junoAccessToken, JunoTokenizacao junoTokenizacao);
-
-        ActionResult modelResponse(dynamic modelJuno);
-        ActionResult consultCharges();
-    }
-
     public class PaymentService : ControllerBase, IPaymentService
     {
         //Access token

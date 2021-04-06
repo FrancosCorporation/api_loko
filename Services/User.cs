@@ -14,33 +14,10 @@ using MongoDB.Bson;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using condominioApi.DependencyService;
 
 namespace condominioApi.Services
 {
-    public interface IUserService
-    {
-        BsonDocument RetornaUserAdm(UserAdm user);
-        BsonDocument RetornaUserRef(UserGenericLogin user);
-        BsonDocument RetornaUserPorteiro(UserPorteiro user);
-        BsonDocument RetornaUserMorador(UserMorador user);
-        Boolean EmailExist(UserGenericLogin user, IMongoClient database);
-        string passwordToHash(string password);
-        string GenerateToken(UserGenericLogin user, double horas);
-        Boolean ValidateToken(HttpRequest request);
-        JObject UnGenereteToken(HttpRequest request);
-        string RemoverCaracterEspecial(string str);
-        string RemoverCaracterEspecialDeixarEspaco(string str);
-        string RemoverBarraToken(string str);
-        void SendEmail(ConstrucaoEmail email);
-        void EmailConfimacao(UserGenericLogin user);
-        void EmailDeRedefinicaoDeSenha(UserGenericLogin user);
-        UserAdm RetornaUserAdmPorId(string nameCondominio, string id);
-        BsonDocument GetBson(String nameDatabase, String nameitem, String nameCollection);
-        void GravaUserAdm(UserAdm user);
-        bool verificaEmailConfirmado(string nameCondominio);
-        bool verificaPagamento(string nameCondominio);
-    }
-
     public class UserService : ControllerBase, IUserService
     {
         private readonly MongoClient _clientMongoDb;

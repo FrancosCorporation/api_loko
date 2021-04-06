@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Atividio.Validadores.Cnpj;
+using condominioApi.DependencyService;
+
 namespace condominioApi.Services
 {
     public class CondominioService : ControllerBase

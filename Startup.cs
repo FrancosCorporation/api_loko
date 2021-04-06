@@ -8,9 +8,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System;
 using Microsoft.Extensions.Options;
-using System.Threading;
 using condominioApi.Services;
 using condominioApi.Models;
+using condominioApi.DependencyService;
 
 namespace condominioApi
 {

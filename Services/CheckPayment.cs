@@ -7,7 +7,7 @@ using MongoDB.Driver;
 using RestSharp;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using MongoDB.Bson;
+using condominioApi.DependencyService;
 
 namespace condominioApi.Services
 {
