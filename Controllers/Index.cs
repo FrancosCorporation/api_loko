@@ -8,7 +8,7 @@ namespace condominioApi.Controllers
         [HttpGet("index")]
         public ContentResult Index()
         {
-            var content = "<html><body><h1>Hello World</h1><p>Some text</p></body></html>";
+            var content = "<html><body><h1>Git</h1><p>Some text</p></body></html>";
             return new ContentResult()
             {
                 Content = content,
