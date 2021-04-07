@@ -15,13 +15,14 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using condominioApi.DependencyService;
+using condominioApi.HtmlContent;
 
 namespace condominioApi.Services
 {
     public class UserService : ControllerBase, IUserService
     {
         private readonly MongoClient _clientMongoDb;
-        private string URL = "https://localhost:5001/";
+        private string URL = "https://condominioapiazure.azurewebsites.net/";
         private double _timeExpiredTokenEMAIL = 0.5;
 
         public UserService(ICondominioDatabaseSetting setting)
@@ -318,6 +319,8 @@ namespace condominioApi.Services
         }
         public void EmailConfimacao(UserGenericLogin user)
         {
+            ConfirmedContent confirmedContent = new ConfirmedContent();
+
             string url = URL + "api/confirmacaoEmail";
             ConstrucaoEmail email = new ConstrucaoEmail();
             email.email = user.email;
@@ -326,7 +329,7 @@ namespace condominioApi.Services
             string htmlimage = "<img src=" + image + " />";
             string html = string.Empty;
             string link = "<p><a href='" + url + "?token=" + GenerateToken(user, _timeExpiredTokenEMAIL) + "/'>Confirme Seu Email</a></p>";
-            html = new StreamReader("C:\\Users\\Rodolfo\\git\\condominioApi\\Templates\\confirmed.html").ReadToEnd();
+            html = confirmedContent.contentConfirmedEmail;
             html = html.Replace("<image/>", htmlimage);
             email.body = $"{html.Trim() + "\n" + link}";
             SendEmail(email);
@@ -342,7 +345,7 @@ namespace condominioApi.Services
             string htmlimage = "<img src=" + image + " />";
             string html = string.Empty;
             string link = "<p><a href='" + url + "?token=" + GenerateToken(user, _timeExpiredTokenEMAIL) + "/'>Altere Sua Senha</a></p>";
-            html = new StreamReader("C:\\Users\\Rodolfo\\git\\condominioApi\\Templates\\confirmed.html").ReadToEnd();
+            html = new StreamReader("Templates\\confirmed.html").ReadToEnd();
             html = html.Replace("<image/>", htmlimage);
             email.body = $"{html.Trim() + "\n" + link}";
             SendEmail(email);

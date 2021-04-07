@@ -57,7 +57,6 @@ namespace condominioApi.Models
     {
         public string titulo { get; set; }
         public string body { get; set; }
-        [DataType(DataType.EmailAddress)]
         public string email { get; set; }
 
     }
@@ -70,7 +69,6 @@ namespace condominioApi.Models
     public class ConfirmacaoEmail
     {
         [Required]
-        [DataType(DataType.EmailAddress)]
         public string email { get; set; }
         [Required]
         public string nameCondominio { get; set; }
