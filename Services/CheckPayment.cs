@@ -90,7 +90,7 @@ namespace condominioApi.Services
             request.AddHeaders(new Dictionary<string, string>() {
                 {"Authorization", $"Bearer {_getAccessToken.access_token}"},
                 {"X-Api-Version", "2"},
-                {"X-Resource-Token", "85D4CF242645507CEE7332F4451BCBF398027EEA65B36135EA64B99036DD90D4"},
+                {"X-Resource-Token", Settings.Token},
                 {"Content-Type", "application/json;charset=UTF-8"}
             });
 

@@ -27,8 +27,6 @@ namespace condominioApi.Services
 
         private string _baseUrl = "https://sandbox.boletobancario.com";
 
-        private string _planId = "pln_6950A5BBD2696FB2";
-
         public bool isTokenExpiration()
         {
             if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - _validateAccessToken.dateTimeGenerateAccessToken.ToUnixTimeSeconds() > 3600) return true;
@@ -64,7 +62,7 @@ namespace condominioApi.Services
                 var client = new RestClient($"{_baseUrl}/authorization-server/oauth/token");
                 var request = new RestRequest(Method.POST);
                 request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
-                request.AddHeader("Authorization", "Basic a2MxajR6bEdWM1FSdkFYbTpTZ2oyVzdGMXF3MWxhNWRHOytQVkVwak1lJHRqKSxkaA==");
+                request.AddHeader("Authorization", Settings.Authorization );
                 request.AddParameter("grant_type", "client_credentials");
 
                 IRestResponse response = client.Execute(request);
@@ -88,7 +86,7 @@ namespace condominioApi.Services
             request.AddHeaders(new Dictionary<string, string>() {
                 {"Authorization", $"Bearer {junoAccessToken.access_token}"},
                 {"X-Api-Version", "2"},
-                {"X-Resource-Token", "85D4CF242645507CEE7332F4451BCBF398027EEA65B36135EA64B99036DD90D4"},
+                {"X-Resource-Token", Settings.Token},
                 {"Content-Type", "application/json;charset=UTF-8"}
             });
             request.AddJsonBody(new { creditCardHash = cardHash });
@@ -113,13 +111,13 @@ namespace condominioApi.Services
             request.AddHeaders(new Dictionary<string, string>() {
                 {"Authorization", $"Bearer {junoAccessToken.access_token}"},
                 {"X-Api-Version", "2"},
-                {"X-Resource-Token", "85D4CF242645507CEE7332F4451BCBF398027EEA65B36135EA64B99036DD90D4"},
+                {"X-Resource-Token", Settings.Token},
                 {"Content-Type", "application/json;charset=UTF-8"}
             });
             request.AddJsonBody(new
             {
                 dueDay = DateTime.Now.Day,
-                planId = _planId,
+                planId = Settings.PlanId,
                 chargeDescription = "Inscrição plano Condominio",
                 creditCardDetails = new
                 {
@@ -181,7 +179,7 @@ namespace condominioApi.Services
             request.AddHeaders(new Dictionary<string, string>() {
                 {"Authorization", $"Bearer {_getAccessToken.access_token}"},
                 {"X-Api-Version", "2"},
-                {"X-Resource-Token", "85D4CF242645507CEE7332F4451BCBF398027EEA65B36135EA64B99036DD90D4"},
+                {"X-Resource-Token", Settings.Token},
                 {"Content-Type", "application/json;charset=UTF-8"}
             });
 
