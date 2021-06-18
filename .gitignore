@@ -5,3 +5,4 @@ Properties
 *.mdmp
 obj
 db
+Settings.cs
