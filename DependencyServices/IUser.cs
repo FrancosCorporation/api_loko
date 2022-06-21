@@ -1,11 +1,11 @@
-using condominioApi.Models;
+using condominio_api.Models;
 using MongoDB.Bson;
 using System;
 using Microsoft.AspNetCore.Http;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
 
-namespace condominioApi.DependencyService
+namespace condominio_api.DependencyService
 {
     public interface IUserService
     {

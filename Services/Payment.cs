@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using RestSharp;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using condominioApi.Models;
+using condominio_api.Models;
 using System.Net;
 using System;
 using Microsoft.AspNetCore.Http;
-using condominioApi.DependencyService;
+using condominio_api.DependencyService;
 
-namespace condominioApi.Services
+namespace condominio_api.Services
 {
     public class PaymentService : ControllerBase, IPaymentService
     {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace condominioApi.Models
+namespace condominio_api.Models
 {
     public class JunoCharge
     {

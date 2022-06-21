@@ -1,4 +1,4 @@
-namespace condominioApi.Models
+namespace condominio_api.Models
 {
     public class JunoSubscription
     {

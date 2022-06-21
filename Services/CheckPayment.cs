@@ -2,14 +2,14 @@ using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-using condominioApi.Models;
+using condominio_api.Models;
 using MongoDB.Driver;
 using RestSharp;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using condominioApi.DependencyService;
+using condominio_api.DependencyService;
 
-namespace condominioApi.Services
+namespace condominio_api.Services
 {
     public class CheckPayment : IHostedService
     {

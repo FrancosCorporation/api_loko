@@ -8,11 +8,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System;
 using Microsoft.Extensions.Options;
-using condominioApi.Services;
-using condominioApi.Models;
-using condominioApi.DependencyService;
+using condominio_api.Services;
+using condominio_api.Models;
+using condominio_api.DependencyService;
 
-namespace condominioApi
+namespace condominio_api
 {
     public class Startup
     {

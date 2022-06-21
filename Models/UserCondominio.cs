@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
-namespace condominioApi.Models
+namespace condominio_api.Models
 {
     public class UserAdm : UserGenericLogin
     {

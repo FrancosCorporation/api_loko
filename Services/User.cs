@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Mail;
-using condominioApi.Models;
+using condominio_api.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -14,9 +14,9 @@ using MongoDB.Bson;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using condominioApi.DependencyService;
+using condominio_api.DependencyService;
 
-namespace condominioApi.Services
+namespace condominio_api.Services
 {
     public class UserService : ControllerBase, IUserService
     {
@@ -326,7 +326,7 @@ namespace condominioApi.Services
             string htmlimage = "<img src=" + image + " />";
             string html = string.Empty;
             string link = "<p><a href='" + url + "?token=" + GenerateToken(user, _timeExpiredTokenEMAIL) + "/'>Confirme Seu Email</a></p>";
-            html = new StreamReader("C:\\Users\\Rodolfo\\git\\condominioApi\\Templates\\confirmed.html").ReadToEnd();
+            html = new StreamReader("C:\\Users\\Rodolfo\\git\\condominio_api\\Templates\\confirmed.html").ReadToEnd();
             html = html.Replace("<image/>", htmlimage);
             email.body = $"{html.Trim() + "\n" + link}";
             SendEmail(email);
@@ -342,7 +342,7 @@ namespace condominioApi.Services
             string htmlimage = "<img src=" + image + " />";
             string html = string.Empty;
             string link = "<p><a href='" + url + "?token=" + GenerateToken(user, _timeExpiredTokenEMAIL) + "/'>Altere Sua Senha</a></p>";
-            html = new StreamReader("C:\\Users\\Rodolfo\\git\\condominioApi\\Templates\\confirmed.html").ReadToEnd();
+            html = new StreamReader("C:\\Users\\Rodolfo\\git\\condominio_api\\Templates\\confirmed.html").ReadToEnd();
             html = html.Replace("<image/>", htmlimage);
             email.body = $"{html.Trim() + "\n" + link}";
             SendEmail(email);

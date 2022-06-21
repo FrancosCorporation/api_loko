@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
-using condominioApi.Models;
+using condominio_api.Models;
 
-namespace condominioApi.DependencyService
+namespace condominio_api.DependencyService
 {
     public interface IPaymentService
     {        

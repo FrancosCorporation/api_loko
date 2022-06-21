@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
-using condominioApi.DependencyService;
+using condominio_api.DependencyService;
 
-namespace condominioApi.Controllers
+namespace condominio_api.Controllers
 {
     [Route("subscription")]
     [ApiController]
